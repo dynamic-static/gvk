@@ -8,4 +8,4 @@ FetchContent_Declare(
     FETCHCONTENT_UPDATES_DISCONNECTED
 )
 FetchContent_MakeAvailable(tinyxml2)
-set_target_properties(tinyxml2 PROPERTIES FOLDER "gvk/external/")
+set_target_properties(tinyxml2 PROPERTIES FOLDER "${GVK_IDE_FOLDER}/external/")
