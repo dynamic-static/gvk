@@ -298,7 +298,20 @@ void BindingInfo::add_shader(const ShaderInfo& shaderInfo)
 void BindingInfo::add_binding(uint32_t setIndex, const VkDescriptorSetLayoutBinding& descriptorSetLayoutBinding)
 {
     auto& bindings = descriptorSetLayoutBindings[setIndex];
-    bindings.insert(std::upper_bound(bindings.begin(), bindings.end(), descriptorSetLayoutBinding), descriptorSetLayoutBinding);
+    auto bindingItr = std::lower_bound(bindings.begin(), bindings.end(), descriptorSetLayoutBinding,
+        [](const VkDescriptorSetLayoutBinding& lhs, const VkDescriptorSetLayoutBinding& rhs)
+        {
+            return lhs.binding < rhs.binding;
+        }
+    );
+    if (bindingItr == bindings.end()) {
+        bindings.insert(bindingItr, descriptorSetLayoutBinding);
+    } else {
+        auto stageFlags = bindingItr->stageFlags | descriptorSetLayoutBinding.stageFlags;
+        bindingItr->stageFlags = descriptorSetLayoutBinding.stageFlags;
+        assert(*bindingItr == descriptorSetLayoutBinding);
+        bindingItr->stageFlags = stageFlags;
+    }
 }
 
 VkResult create_descriptor_set_layouts(const Device& device, const BindingInfo& bindingInfo, const VkAllocationCallbacks* pAllocator, uint32_t* pDescriptorSetLayoutCount, DescriptorSetLayout* pDescriptorSetLayouts)
