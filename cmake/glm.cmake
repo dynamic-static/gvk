@@ -7,4 +7,4 @@ FetchContent_Declare(
     FETCHCONTENT_UPDATES_DISCONNECTED
 )
 FetchContent_MakeAvailable(glm)
-set_target_properties(glm PROPERTIES FOLDER "gvk/external/")
+set_target_properties(glm PROPERTIES FOLDER "${GVK_IDE_FOLDER}/external/")
