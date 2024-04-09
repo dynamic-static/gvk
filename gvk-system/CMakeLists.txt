@@ -26,3 +26,10 @@ gvk_add_static_library(
     SOURCE_FILES
         "${sourcePath}/surface.cpp"
 )
+
+################################################################################
+# gvk-system
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    # TODO : Need to revisit cmake exports on Linux
+    gvk_install_library(TARGET gvk-system)
+endif()
