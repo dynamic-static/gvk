@@ -170,7 +170,7 @@ macro(gvk_add_target_test)
             add_test(NAME ${ARGS_TARGET}.tests COMMAND ${ARGS_TARGET}.tests)
             add_custom_command(
                 TARGET ${ARGS_TARGET}.tests POST_BUILD
-                COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> --verbose --output-on-failures
+                COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> --verbose --output-on-failure
             )
         endif()
         if(GVK_BUILD_TESTS)
@@ -233,7 +233,7 @@ function(gvk_install_artifacts)
     string(REPLACE "$" "" interfaceLinkLibraries "${interfaceLinkLibraries}")
     string(REPLACE "<LINK_ONLY:" "" interfaceLinkLibraries "${interfaceLinkLibraries}")
     string(REPLACE ">" "" interfaceLinkLibraries "${interfaceLinkLibraries}")
-    list(REMOVE_ITEM interfaceLinkLibraries ${CMAKE_DL_LIBS} rt Threads::Threads Vulkan::Vulkan)
+    list(REMOVE_ITEM interfaceLinkLibraries ${CMAKE_DL_LIBS} rt Threads::Threads Vulkan::Vulkan glm-header-only)
     configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION {CMAKE_BINARY_DIR}/cmake/)
     install(FILES "${config}" "${configVersion}" DESTINATION cmake/${ARGS_TARGET}/)
 endfunction()

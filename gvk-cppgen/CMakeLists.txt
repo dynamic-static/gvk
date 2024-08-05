@@ -61,3 +61,7 @@ gvk_add_static_library(
         "${sourcePath}/structure-to-string-generator.cpp"
         "${sourcePath}/utilities.cpp"
 )
+
+################################################################################
+# gvk-cppgen install
+gvk_install_library(TARGET gvk-cppgen)

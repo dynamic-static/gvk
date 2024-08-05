@@ -34,3 +34,11 @@ gvk_add_static_library(
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set_source_files_properties("${imgui_SOURCE_DIR}/imgui.cpp" PROPERTIES COMPILE_FLAGS "-Wno-strict-aliasing")
 endif()
+gvk_install_artifacts(TARGET imgui VERSION ${imgui_VERSION})
+install(
+    FILES
+        "${imgui_SOURCE_DIR}/imconfig.h"
+        "${imgui_SOURCE_DIR}/imgui.h"
+    DESTINATION
+        include/
+)

@@ -10,7 +10,7 @@ gvk_add_static_library(
     FOLDER
         "gvk-math/"
     LINK_LIBRARIES
-        glm
+        glm-header-only
     INCLUDE_DIRECTORIES
         "${includeDirectory}"
     INCLUDE_FILES
@@ -23,3 +23,7 @@ gvk_add_static_library(
         "${sourcePath}/camera.cpp"
         "${sourcePath}/transform.cpp"
 )
+
+################################################################################
+# gvk-math install
+gvk_install_library(TARGET gvk-math)
