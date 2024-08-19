@@ -1,8 +1,14 @@
 
-include_guard()
+include_guard(GLOBAL)
 
-include(FetchContent)
+################################################################################
+# TODO : Documentation
+set(gvk-imgui-enabled           ON CACHE BOOL "" FORCE)
+set(gvk-install-imgui-artifacts ON CACHE BOOL "")
+set(gvk-install-imgui-headers   ON CACHE BOOL "")
 
+################################################################################
+# TODO : Documentation
 set(imgui_VERSION 00ad3c65bc256a16521288505f26fb335440f8f5) # 1.90.7
 FetchContent_Declare(
     imgui
@@ -10,9 +16,11 @@ FetchContent_Declare(
     GIT_TAG ${imgui_VERSION}
     GIT_PROGRESS TRUE
 )
+
+################################################################################
+# TODO : Documentation
 FetchContent_MakeAvailable(imgui)
 FetchContent_GetProperties(imgui SOURCE_DIR imgui_SOURCE_DIR)
-
 gvk_add_static_library(
     TARGET imgui
     FOLDER "external/"
@@ -34,11 +42,18 @@ gvk_add_static_library(
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set_source_files_properties("${imgui_SOURCE_DIR}/imgui.cpp" PROPERTIES COMPILE_FLAGS "-Wno-strict-aliasing")
 endif()
-gvk_install_artifacts(TARGET imgui VERSION ${imgui_VERSION})
-install(
-    FILES
-        "${imgui_SOURCE_DIR}/imconfig.h"
-        "${imgui_SOURCE_DIR}/imgui.h"
-    DESTINATION
-        include/
-)
+
+################################################################################
+# TODO : Documentation
+if(gvk-install-imgui-artifacts)
+    gvk_install_artifacts(TARGET imgui VERSION ${imgui_VERSION})
+endif()
+if(gvk-install-imgui-headers)
+    install(
+        FILES
+            "${imgui_SOURCE_DIR}/imconfig.h"
+            "${imgui_SOURCE_DIR}/imgui.h"
+        DESTINATION
+            include/
+    )
+endif()

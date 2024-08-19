@@ -86,11 +86,9 @@ gvk_add_static_library(
     LINK_LIBRARIES
         gvk-runtime
         cereal
-        # cereal_INTERFACE
     INCLUDE_DIRECTORIES
         "${generatedIncludeDirectory}"
         "${includeDirectory}"
-        # "${cerealSourceDirectory}/include/"
     INCLUDE_FILES
         "${generatedIncludeFiles}"
         "${includePath}/detail/cerealization-manual.hpp"

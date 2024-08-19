@@ -1,9 +1,11 @@
 
 include_guard()
 
+include(CMakeDependentOption)
 include(CMakePackageConfigHelpers)
 include(CMakeParseArguments)
 include(CTest)
+include(FetchContent)
 
 find_package(Git REQUIRED)
 
@@ -246,6 +248,11 @@ function(gvk_install_headers)
         string(REPLACE "<BUILD_INTERFACE:" "" interfaceIncludeDirectories "${interfaceIncludeDirectories}")
         string(REPLACE "<INSTALL_INTERFACE:include" "" interfaceIncludeDirectories "${interfaceIncludeDirectories}")
         string(REPLACE ">" "" interfaceIncludeDirectories "${interfaceIncludeDirectories}")
+
+        message("=========================================================")
+        message("ARGS_TARGET = ${ARGS_TARGET}")
+        message("interfaceIncludeDirectories = ${interfaceIncludeDirectories}")
+
         foreach(interfaceIncludeDirectory ${interfaceIncludeDirectories})
             install(DIRECTORY "${interfaceIncludeDirectory}" DESTINATION include/)
         endforeach()

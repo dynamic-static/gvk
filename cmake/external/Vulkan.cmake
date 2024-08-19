@@ -1,4 +1,8 @@
 
+include_guard(GLOBAL)
+
+set(GVK_TINY_VULKAN_ENABLED ON CACHE BOOL "" FORCE)
+
 find_package(Vulkan REQUIRED)
 
 ################################################################################

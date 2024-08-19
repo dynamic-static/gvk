@@ -83,7 +83,3 @@ gvk_add_static_library(
 if(MSVC)
     set_source_files_properties("${generatedSourcePath}/command-structure-comparison-operators.cpp" PROPERTIES COMPILE_FLAGS "/bigobj")
 endif()
-
-################################################################################
-# gvk-command-structures install
-gvk_install_library(TARGET gvk-command-structures)

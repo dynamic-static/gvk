@@ -1,8 +1,14 @@
 
-include_guard()
+include_guard(GLOBAL)
 
-include(FetchContent)
+################################################################################
+# TODO : Documentation
+set(gvk-stb-enabled           ON CACHE BOOL "" FORCE)
+set(gvk-install-stb-artifacts ON CACHE BOOL "")
+set(gvk-install-stb-headers   ON CACHE BOOL "")
 
+################################################################################
+# TODO : Documentation
 set(stb_VERSION 013ac3beddff3dbffafd5177e7972067cd2b5083)
 FetchContent_Declare(
     stb
@@ -10,10 +16,15 @@ FetchContent_Declare(
     GIT_TAG ${stb_VERSION}
     GIT_PROGRESS TRUE
 )
+
+################################################################################
+# TODO : Documentation
 FetchContent_MakeAvailable(stb)
 FetchContent_GetProperties(stb SOURCE_DIR stb_SOURCE_DIR)
 FetchContent_GetProperties(stb BINARY_DIR stb_BINARY_DIR)
 
+################################################################################
+# TODO : Documentation
 macro(gvk_add_stb_file stbFile implementationMacro)
     file(COPY "${stb_SOURCE_DIR}/${stbFile}.h" DESTINATION "${stb_BINARY_DIR}/stb/")
     list(APPEND includeFiles "${stb_BINARY_DIR}/stb/${stbFile}.h")
@@ -47,9 +58,13 @@ macro(gvk_add_stb_file stbFile implementationMacro)
     endif()
 endmacro()
 
+################################################################################
+# TODO : Documentation
 gvk_add_stb_file(stb_image STB_IMAGE_IMPLEMENTATION)
 gvk_add_stb_file(stb_image_write STB_IMAGE_WRITE_IMPLEMENTATION)
 
+################################################################################
+# TODO : Documentation
 gvk_add_static_library(
     TARGET stb
     FOLDER "external/"
@@ -58,4 +73,8 @@ gvk_add_static_library(
     SOURCE_FILES "${sourceFiles}"
 )
 
-gvk_install_artifacts(TARGET stb VERSION ${stb_VERSION})
+################################################################################
+# TODO : Documentation
+if(gvk-install-stb-artifacts)
+    gvk_install_artifacts(TARGET stb VERSION ${stb_VERSION})
+endif()
