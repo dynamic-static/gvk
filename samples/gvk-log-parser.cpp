@@ -25,7 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
 
-#include "gvk-sample-utilities.hpp"
+#include "gvk-string.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -119,7 +119,7 @@ static std::vector<std::string> parse_log(const std::filesystem::path& filePath)
     return logEntries;
 }
 
-void output_function_counts(const std::vector<std::string>& logEntries)
+void output_function_counts(const std::vector<std::string>& logEntries = { })
 {
     std::map<std::string, uint32_t> functionCounts;
     for (const auto& logEntry : logEntries) {
@@ -138,11 +138,10 @@ void output_function_counts(const std::vector<std::string>& logEntries)
 
 int main(int argc, const char* ppArgv[])
 {
-    auto cmdLine = get_cmd_line(argc, ppArgv, { {"-x", GVK_XML_FILE_PATH} });
+    auto cmdLine = get_cmd_line(argc, ppArgv);
     if (!cmdLine.count("-f") || cmdLine.count("-h")) {
         std::cout << "-h : Output this help text" << std::endl;
         std::cout << "-f : Filepath to the log to parse; required" << std::endl;
-        std::cout << "-x : vk.xml filepath; if not provided GVK_XML_FILE_PATH will be used" << std::endl;
     } else {
         output_function_counts(parse_log(cmdLine["-f"]));
     }

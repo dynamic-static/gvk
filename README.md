@@ -47,8 +47,8 @@ For Linux, replace `cmake -G "Visual Studio 17 2022" -A x64 ..` with `cmake ..` 
 Somewhere in your CMakeLists, add the following...
 ```
 include(FetchContent)
-set(GVK_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GVK_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(gvk-build-tests OFF CACHE BOOL "" FORCE)
+set(gvk-build-samples OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     gvk
     GIT_REPOSITORY "https://github.com/intel/gvk.git"
