@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-glslang-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-glslang-artifacts ON CACHE BOOL "")
-set(gvk-install-glslang-headers   ON CACHE BOOL "")
+gvk_enable_target(glslang)
 
 ################################################################################
 # TODO : Documentation
@@ -59,3 +57,4 @@ gvk_setup_glslang_target(MachineIndependent)
 gvk_setup_glslang_target(OSDependent)
 gvk_setup_glslang_target(SPIRV)
 gvk_setup_glslang_target(SPVRemapper)
+set(glslangLibraries ${glslangLibraries} PARENT_SCOPE)

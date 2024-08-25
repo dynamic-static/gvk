@@ -1,7 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(GVK_FORMAT_INFO_ENABLED ON CACHE BOOL "" FORCE)
+gvk_enable_target(gvk-format-info)
 
 include(gvk/cppgen)
 include(gvk/runtime)

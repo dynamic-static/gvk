@@ -15,6 +15,13 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/install/" CACHE PATH "..." FORCE)
 endif()
 
+macro(gvk_enable_target target)
+    string(REPLACE "gvk-" "" target "${target}")
+    set(gvk-${target}-enabled           ON CACHE BOOL "" FORCE)
+    set(gvk-${target}-install-artifacts ON CACHE BOOL "")
+    set(gvk-${target}-install-headers   ON CACHE BOOL "")
+endmacro()
+
 function(gvk_create_file_group files)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
     foreach(file ${files})
@@ -44,6 +51,8 @@ function(gvk_setup_target)
     gvk_create_file_group("${ARGS_INCLUDE_FILES}")
     gvk_create_file_group("${ARGS_SOURCE_FILES}")
     set_target_properties(${ARGS_TARGET} PROPERTIES FOLDER "${GVK_IDE_FOLDER}/${ARGS_FOLDER}")
+
+    message("${ARGS_LINK_LIBRARIES}")
 endfunction()
 
 function(gvk_add_static_library)

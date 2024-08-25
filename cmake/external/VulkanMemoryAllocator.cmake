@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-VulkanMemoryAllocator-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-VulkanMemoryAllocator-artifacts ON CACHE BOOL "")
-set(gvk-install-VulkanMemoryAllocator-headers   ON CACHE BOOL "")
+gvk_enable_target(VulkanMemoryAllocator)
 
 ################################################################################
 # TODO : Documentation
@@ -25,15 +23,11 @@ FetchContent_GetProperties(VulkanMemoryAllocator SOURCE_DIR VulkanMemoryAllocato
 add_library(VulkanMemoryAllocator INTERFACE)
 target_include_directories(VulkanMemoryAllocator INTERFACE "$<BUILD_INTERFACE:${VulkanMemoryAllocator_SOURCE_DIR}/include/>" $<INSTALL_INTERFACE:include>)
 
-# ################################################################################
-# # TODO : Documentation
-# gvk_install_library(TARGET VulkanMemoryAllocator VERSION ${VulkanMemoryAllocator_VERSION})
-
 ################################################################################
 # TODO : Documentation
-if(gvk-install-VulkanMemoryAllocator-artifacts)
+if(gvk-VulkanMemoryAllocator-install-artifacts)
     gvk_install_artifacts(TARGET VulkanMemoryAllocator VERSION ${VulkanMemoryAllocator_VERSION})
 endif()
-if(gvk-install-VulkanMemoryAllocator-headers)
+if(gvk-VulkanMemoryAllocator-install-headers)
     gvk_install_headers(TARGET VulkanMemoryAllocator VERSION ${VulkanMemoryAllocator_VERSION})
 endif()

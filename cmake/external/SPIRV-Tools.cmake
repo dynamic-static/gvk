@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-SPIRV-Tools-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-SPIRV-Tools-artifacts ON CACHE BOOL "")
-set(gvk-install-SPIRV-Tools-headers   ON CACHE BOOL "")
+gvk_enable_target(SPIRV-Tools)
 
 ################################################################################
 # TODO : Documentation
@@ -45,6 +43,10 @@ if(CMAKE_FOLDER)
 endif()
 set(CMAKE_FOLDER "${GVK_IDE_FOLDER}/external/SPIRV-Tools/")
 
+set_target_properties(core_tables                                      PROPERTIES FOLDER "${CMAKE_FOLDER}")
+set_target_properties(enum_string_mapping                              PROPERTIES FOLDER "${CMAKE_FOLDER}")
+set_target_properties(extinst_tables                                   PROPERTIES FOLDER "${CMAKE_FOLDER}")
+set_target_properties(spirv-tools-pkg-config                           PROPERTIES FOLDER "${CMAKE_FOLDER}")
 set_target_properties(spirv-tools-build-version                        PROPERTIES FOLDER "${CMAKE_FOLDER}")
 set_target_properties(SPIRV-Tools-diff                                 PROPERTIES FOLDER "${CMAKE_FOLDER}")
 set_target_properties(spirv-tools-header-DebugInfo                     PROPERTIES FOLDER "${CMAKE_FOLDER}")
@@ -75,7 +77,7 @@ endif()
 
 ################################################################################
 # TODO : Documentation
-if(gvk-install-SPIRV-Tools-artifacts)
+if(gvk-SPIRV-Tools-install-artifacts)
     gvk_install_artifacts(TARGET SPIRV-Tools-opt VERSION ${SPIRV-Tools_VERSION})
     gvk_install_artifacts(TARGET SPIRV-Tools-static VERSION ${SPIRV-Tools_VERSION})
 endif()

@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-glm-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-glm-artifacts ON CACHE BOOL "")
-set(gvk-install-glm-headers   ON CACHE BOOL "")
+gvk_enable_target(glm)
 
 ################################################################################
 # TODO : Documentation
@@ -24,9 +22,9 @@ set_target_properties(glm PROPERTIES FOLDER "${GVK_IDE_FOLDER}/external/")
 
 ################################################################################
 # TODO : Documentation
-if(gvk-install-glm-artifacts)
+if(gvk-glm-install-artifacts)
     gvk_install_artifacts(TARGET glm-header-only VERSION ${glm_VERSION})
 endif()
-if(gvk-install-glm-headers)
+if(gvk-glm-install-headers)
     install(DIRECTORY "${glm_SOURCE_DIR}/glm/" DESTINATION include/glm/)
 endif()

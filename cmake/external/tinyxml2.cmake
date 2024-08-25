@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-tiny-xml-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-tinyxml2-artifacts ON CACHE BOOL "")
-set(gvk-install-tinyxml2-headers   ON CACHE BOOL "")
+gvk_enable_target(tinyxml2)
 
 ################################################################################
 # TODO : Documentation
@@ -33,9 +31,9 @@ gvk_add_static_library(
 
 ################################################################################
 # TODO : Documentation
-if(gvk-install-tinyxml2-artifacts)
+if(gvk-tinyxml2-install-artifacts)
     gvk_install_artifacts(TARGET tinyxml2) # VERSION ${tinyxml2_VERSION}) ?
 endif()
-if(gvk-install-tinyxml2-headers)
+if(gvk-tinyxml2-install-headers)
     gvk_install_headers(TARGET tinyxml2) # VERSION ${tinyxml2_VERSION}) ?
 endif()

@@ -1,7 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(GVK_SYSTEM_ENABLED ON CACHE BOOL "" FORCE)
+gvk_enable_target(gvk-system)
 
 include(gvk/reference)
 include(external/glfw)

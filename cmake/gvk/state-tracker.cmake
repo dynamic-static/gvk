@@ -1,7 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(GVK_STATE_TRACKER_ENABLED ON CACHE BOOL "" FORCE)
+gvk_enable_target(gvk-state-tracker)
 
 include(gvk/command-structures)
 include(gvk/cppgen)

@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-SPIRV-Headers-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-SPIRV-Headers-artifacts ON CACHE BOOL "")
-set(gvk-install-SPIRV-Headers-headers   ON CACHE BOOL "")
+gvk_enable_target(SPIRV-Headers)
 
 ################################################################################
 # TODO : Documentation
@@ -24,7 +22,6 @@ FetchContent_MakeAvailable(SPIRV-Headers)
 
 ################################################################################
 # TODO : Documentation
-if(gvk-install-SPIRV-Headers-artifacts)
-    message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+if(gvk-SPIRV-Headers-install-headers)
     gvk_install_artifacts(TARGET SPIRV-Headers VERSION ${SPIRV-Headers_VERSION})
 endif()

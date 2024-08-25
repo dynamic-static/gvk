@@ -1,7 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(GVK_VIRTUAL_SWAPCHAIN_ENABLED ON CACHE BOOL "" FORCE)
+gvk_enable_target(gvk-virtual-swapchain)
 
 include(gvk/handles)
 

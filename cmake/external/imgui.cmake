@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-imgui-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-imgui-artifacts ON CACHE BOOL "")
-set(gvk-install-imgui-headers   ON CACHE BOOL "")
+gvk_enable_target(imgui)
 
 ################################################################################
 # TODO : Documentation
@@ -45,10 +43,10 @@ endif()
 
 ################################################################################
 # TODO : Documentation
-if(gvk-install-imgui-artifacts)
+if(gvk-imgui-install-artifacts)
     gvk_install_artifacts(TARGET imgui VERSION ${imgui_VERSION})
 endif()
-if(gvk-install-imgui-headers)
+if(gvk-imgui-install-headers)
     install(
         FILES
             "${imgui_SOURCE_DIR}/imconfig.h"

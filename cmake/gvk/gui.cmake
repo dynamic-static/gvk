@@ -1,7 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(GVK_GUI_ENABLED ON CACHE BOOL "" FORCE)
+gvk_enable_target(gvk-gui)
 
 include(gvk/handles)
 include(gvk/spirv)

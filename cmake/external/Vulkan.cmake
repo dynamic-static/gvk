@@ -1,7 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(GVK_TINY_VULKAN_ENABLED ON CACHE BOOL "" FORCE)
+set(gvk-Vulkan-enabled ON CACHE BOOL "" FORCE)
 
 find_package(Vulkan REQUIRED)
 

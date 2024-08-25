@@ -1,7 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(GVK_CPPGEN_ENABLED ON CACHE BOOL "" FORCE)
+gvk_enable_target(gvk-cppgen)
 
 include(gvk/string)
 include(gvk/xml)

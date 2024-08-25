@@ -1,7 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(GVK_XML_ENABLED ON CACHE BOOL "" FORCE)
+gvk_enable_target(gvk-xml)
 
 include(gvk/string)
 include(external/tinyxml2)

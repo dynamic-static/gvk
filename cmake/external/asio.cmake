@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-asio-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-asio-artifacts ON CACHE BOOL "")
-set(gvk-install-asio-headers   ON CACHE BOOL "")
+gvk_enable_target(asio)
 
 ################################################################################
 # TODO : Documentation
@@ -30,6 +28,6 @@ target_include_directories(asio INTERFACE "$<BUILD_INTERFACE:${asio_SOURCE_DIR}/
 
 ################################################################################
 # TODO : Documentation
-if(gvk-install-asio-artifacts)
+if(gvk-asio-install-artifacts)
     gvk_install_artifacts(TARGET asio VERSION ${asio_VERSION})
 endif()

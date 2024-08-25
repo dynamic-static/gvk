@@ -1,6 +1,6 @@
 
 include_guard(GLOBAL)
 
-set(GVK_STRING_ENABLED ON CACHE BOOL "" FORCE)
+gvk_enable_target(gvk-string)
 
 add_subdirectory(gvk-string)

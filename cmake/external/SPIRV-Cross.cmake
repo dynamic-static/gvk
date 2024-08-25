@@ -1,11 +1,11 @@
 
 include_guard(GLOBAL)
 
+message("Entered SPIRV-Cross.cmake")
+
 ################################################################################
 # TODO : Documentation
-set(gvk-SPIRV-Cross-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-SPIRV-Cross-artifacts ON CACHE BOOL "")
-set(gvk-install-SPIRV-Cross-headers   ON CACHE BOOL "")
+gvk_enable_target(SPIRV-Cross)
 
 ################################################################################
 # TODO : Documentation
@@ -29,6 +29,7 @@ FetchContent_GetProperties(SPIRV-Cross SOURCE_DIR SPIRV-Cross_SOURCE_DIR)
 ################################################################################
 # TODO : Documentation
 macro(gvk_setup_spirv_cross_target spirvCrossTarget)
+    message("spirvCrossTarget = ${spirvCrossTarget}")
     list(APPEND spirvCrossLibraries ${spirvCrossTarget})
     set_target_properties(${spirvCrossTarget} PROPERTIES FOLDER "${GVK_IDE_FOLDER}/external/SPIRV-Cross/")
     gvk_install_artifacts(TARGET ${spirvCrossTarget} VERSION ${SPIRV-Cross_VERSION})
@@ -44,10 +45,16 @@ gvk_setup_spirv_cross_target(spirv-cross-hlsl)
 gvk_setup_spirv_cross_target(spirv-cross-msl)
 gvk_setup_spirv_cross_target(spirv-cross-reflect)
 gvk_setup_spirv_cross_target(spirv-cross-util)
+set(spirvCrossLibraries ${spirvCrossLibraries} PARENT_SCOPE)
 
 ################################################################################
 # TODO : Documentation
-if(gvk-install-SPIRV-Cross-headers)
+if(gvk-SPIRV-Cross-install-headers)
     file(GLOB spirvCrossHeaderFiles "${SPIRV-Cross_SOURCE_DIR}/*.h" "${SPIRV-Cross_SOURCE_DIR}/*.hpp")
     install(FILES ${spirvCrossHeaderFiles} DESTINATION include/spirv_cross/)
 endif()
+
+message("--------------------------------------------")
+message("spirvCrossLibraries = ${spirvCrossLibraries}")
+message("--------------------------------------------")
+message("Leaving SPIRV-Cross.cmake")

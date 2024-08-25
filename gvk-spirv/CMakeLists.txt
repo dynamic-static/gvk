@@ -1,4 +1,8 @@
 
+message("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+message("spirvCrossLibraries = ${spirvCrossLibraries}")
+message("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+
 ################################################################################
 # gvk-spirv
 set(includeDirectory "${CMAKE_CURRENT_LIST_DIR}/include/")

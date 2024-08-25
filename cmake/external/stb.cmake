@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-stb-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-stb-artifacts ON CACHE BOOL "")
-set(gvk-install-stb-headers   ON CACHE BOOL "")
+gvk_enable_target(stb)
 
 ################################################################################
 # TODO : Documentation
@@ -75,6 +73,6 @@ gvk_add_static_library(
 
 ################################################################################
 # TODO : Documentation
-if(gvk-install-stb-artifacts)
+if(gvk-stb-install-artifacts)
     gvk_install_artifacts(TARGET stb VERSION ${stb_VERSION})
 endif()

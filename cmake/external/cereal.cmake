@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-cereal-enabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-cereal-artifacts ON CACHE BOOL "")
-set(gvk-install-cereal-headers   ON CACHE BOOL "")
+gvk_enable_target(cereal)
 
 ################################################################################
 # TODO : Documentation
@@ -24,6 +22,6 @@ FetchContent_MakeAvailable(cereal)
 
 ################################################################################
 # TODO : Documentation
-if(gvk-install-cereal-artifacts)
+if(gvk-cereal-install-artifacts)
     gvk_install_artifacts(TARGET cereal VERSION ${cereal_VERSION})
 endif()

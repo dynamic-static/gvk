@@ -3,9 +3,7 @@ include_guard(GLOBAL)
 
 ################################################################################
 # TODO : Documentation
-set(gvk-glfw-wnabled           ON CACHE BOOL "" FORCE)
-set(gvk-install-glfw-artifacts ON CACHE BOOL "")
-set(gvk-install-glfw-headers   ON CACHE BOOL "")
+gvk_enable_target(glfw)
 
 ################################################################################
 # TODO : Documentation
@@ -30,7 +28,7 @@ set_target_properties(update_mappings PROPERTIES FOLDER "${folder}")
 
 ################################################################################
 # TODO : Documentation
-if(gvk-install-glfw-artifacts)
+if(gvk-glfw-install-artifacts)
     if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         # TODO : Need to revisit cmake exports on Linux
         gvk_install_artifacts(TARGET glfw VERSION ${glfw_VERSION})

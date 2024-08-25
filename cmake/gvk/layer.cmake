@@ -1,7 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(GVK_LAYER_ENABLED ON CACHE BOOL "" FORCE)
+gvk_enable_target(gvk-layer)
 
 include(gvk/cppgen)
 include(gvk/runtime)

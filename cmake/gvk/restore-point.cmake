@@ -1,7 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(GVK_RESTORE_POINT_ENABLED ON CACHE BOOL "" FORCE)
+gvk_enable_target(gvk-restore-point)
 
 include(gvk/cppgen)
 include(gvk/command-structures)
