@@ -73,7 +73,9 @@ gvk_include(external stb)
 gvk_include(external tinyxml2)
 gvk_include(external Vulkan)
 gvk_include(external VulkanMemoryAllocator)
-gvk_include(external googletest)
+if(gvk-build-tests)
+    include(external/googletest)
+endif()
 
 ################################################################################
 # Include GVK libraries
