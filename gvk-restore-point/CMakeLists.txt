@@ -52,6 +52,10 @@ gvk_add_code_generator(
 set(includeDirectory "${CMAKE_CURRENT_LIST_DIR}/include/")
 set(includePath "${includeDirectory}/gvk-restore-point/")
 set(sourcePath "${CMAKE_CURRENT_LIST_DIR}/source/gvk-restore-point/")
+list(APPEND interfaceFiles
+    "${includeDirectory}/VK_LAYER_INTEL_gvk_restore_point.h"
+    "${includeDirectory}/VK_LAYER_INTEL_gvk_restore_point.hpp"
+)
 gvk_add_layer(
     TARGET
         VK_LAYER_INTEL_gvk_restore_point
@@ -69,8 +73,7 @@ gvk_add_layer(
         stb
         Threads::Threads
     INTERFACE_FILES
-        "${includeDirectory}/VK_LAYER_INTEL_gvk_restore_point.h"
-        "${includeDirectory}/VK_LAYER_INTEL_gvk_restore_point.hpp"
+        "${interfaceFiles}"
     INCLUDE_DIRECTORIES
         "${generatedIncludeDirectory}"
         "${includeDirectory}"
@@ -80,7 +83,8 @@ gvk_add_layer(
         "${includePath}/copy-engine.hpp"
         "${includePath}/creator.hpp"
         "${includePath}/layer.hpp"
-        "${includePath}/logger.hpp"
+        "${includePath}/object-map.hpp"
+        "${includePath}/restore-point.hpp"
         "${includePath}/utilities.hpp"
     SOURCE_FILES
         "${generatedSourceFiles}"
@@ -99,21 +103,21 @@ gvk_add_layer(
         "${sourcePath}/handles/query-pool.cpp"
         "${sourcePath}/handles/queue.cpp"
         "${sourcePath}/handles/semaphore.cpp"
+        "${sourcePath}/handles/shader.cpp"
         "${sourcePath}/handles/surface.cpp"
         "${sourcePath}/handles/swapchain.cpp"
         "${sourcePath}/applier.cpp"
         "${sourcePath}/copy-engine.cpp"
         "${sourcePath}/creator.cpp"
         "${sourcePath}/layer.cpp"
-        "${sourcePath}/logger.cpp"
-        "${sourcePath}/utilities.cpp"
+        "${sourcePath}/object-map.cpp"
     DESCRIPTION
         "Intel(R) GPA Utilities for Vulkan* restore point"
     ENTRY_POINTS
         gvkCreateRestorePoint
-        gvkGetRestorePointObjects
-        gvkDestroyRestorePoint
         gvkApplyRestorePoint
+        gvkGetRestorePointManifest
+        gvkDestroyRestorePoint
 )
 if(MSVC)
     set_source_files_properties("${generatedSourcePath}/update-structure-handles.cpp" PROPERTIES COMPILE_FLAGS "/bigobj")
@@ -121,5 +125,10 @@ endif()
 
 ################################################################################
 # VK_LAYER_INTEL_gvk_restore_point install
-gvk_install_library(TARGET VK_LAYER_INTEL_gvk_restore_point-interface)
-gvk_install_layer(TARGET VK_LAYER_INTEL_gvk_restore_point)
+if(gvk-restore-point_INSTALL_ARTIFACTS)
+    gvk_install_artifacts(TARGET VK_LAYER_INTEL_gvk_restore_point-interface)
+    gvk_install_layer(TARGET VK_LAYER_INTEL_gvk_restore_point)
+endif()
+if(gvk-restore-point_INSTALL_HEADERS)
+    install(FILES ${interfaceFiles} DESTINATION include/)
+endif()

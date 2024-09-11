@@ -55,13 +55,20 @@ gvk_add_static_library(
         "${includeDirectory}"
     INCLUDE_FILES
         "${generatedIncludeFiles}"
+        "${includePath}/log.hpp"
         "${includePath}/registry.hpp"
         "${includeDirectory}/gvk-layer.hpp"
     SOURCE_FILES
         "${generatedSourceFiles}"
+        "${sourcePath}/log.cpp"
         "${sourcePath}/registry.cpp"
 )
 
 ################################################################################
 # gvk-layer install
-gvk_install_library(TARGET gvk-layer)
+if(gvk-layer_INSTALL_ARTIFACTS)
+    gvk_install_artifacts(TARGET gvk-layer)
+endif()
+if(gvk-layer_INSTALL_HEADERS)
+    gvk_install_headers(TARGET gvk-layer)
+endif()

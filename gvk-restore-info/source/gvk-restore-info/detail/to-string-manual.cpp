@@ -33,7 +33,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace gvk {
 
 template <>
-void print<GvkRestorePointObject>(Printer& printer, const GvkRestorePointObject& obj)
+void print<GvkStateTrackedObject>(Printer& printer, const GvkStateTrackedObject& obj)
 {
     printer.print_object(
         [&]()
