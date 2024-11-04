@@ -35,7 +35,7 @@ gvk_add_code_generator(
         GVK_XML_FILE_PATH="${Vulkan_XML}"
 )
 if(MSVC)
-    set_source_files_properties("${generatedSourcePath}/comparison-operators.cpp" PROPERTIES COMPILE_FLAGS "/bigobj")
+    set_source_files_properties("${generatedSourcePath}/handles.cpp" PROPERTIES COMPILE_FLAGS "/bigobj")
 endif()
 
 ################################################################################
