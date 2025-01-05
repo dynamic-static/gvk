@@ -524,7 +524,10 @@ VkResult initialize_control_block<SwapchainKHR>(SwapchainKHR& swapchain)
         imageCreateInfo.pQueueFamilyIndices = swapchainCreateInfo.pQueueFamilyIndices;
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         for (uint32_t i = 0; i < swapchainImageCount; ++i) {
-            images[i].mReference.reset(newref, HandleId<VkDevice, VkImage>(swapchainControlBlock.mDevice, pVkImages[i]));
+            images[i] = Image({ swapchainControlBlock.mDevice, pVkImages[i] });
+            if (!images[i]) {
+                images[i].mReference.reset(newref, { swapchainControlBlock.mDevice, pVkImages[i] });
+            }
             auto& imageControlBlock = images[i].mReference.get_obj();
             imageControlBlock.mVkImage = pVkImages[i];
             imageControlBlock.mDevice = swapchainControlBlock.mDevice;
@@ -585,6 +588,23 @@ Image::ControlBlock::~ControlBlock()
             dispatchTable.gvkDestroyImage(mDevice, mVkImage, (mAllocationCallbacks.pfnFree ? &mAllocationCallbacks : nullptr));
         }
     }
+}
+
+SwapchainKHR::ControlBlock::~ControlBlock()
+{
+    for (auto& image : mImages) {
+        auto& imageControlBlock = image.mReference.get_obj();
+        imageControlBlock.mDevice = VK_NULL_HANDLE;
+        imageControlBlock.mAllocationCallbacks = { };
+        imageControlBlock.mVkImage = VK_NULL_HANDLE;
+        imageControlBlock.mVmaAllocation = VK_NULL_HANDLE;
+        imageControlBlock.mVmaAllocationCreateInfo = { };
+        imageControlBlock.mImageCreateInfo.reset();
+        image.mReference.release();
+    }
+    const auto& dispatchTable = mDevice.get<DispatchTable>();
+    assert(dispatchTable.gvkDestroySwapchainKHR);
+    dispatchTable.gvkDestroySwapchainKHR(mDevice, mVkSwapchainKHR, (mAllocationCallbacks.pfnFree ? &mAllocationCallbacks : nullptr));
 }
 
 } // namespace gvk

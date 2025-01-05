@@ -205,6 +205,14 @@ public:
     }
 
     /**
+    TODO : Documentation
+    */
+    inline void release()
+    {
+        release(mId);
+    }
+
+    /**
     Dereferences this Reference<> object's referenced object
     @return A reference to this Reference<> object's referenced object
     */
@@ -312,6 +320,17 @@ public:
         return Registry::get_instance().enumerate(processReference);
     }
 
+    /**
+    TODO : Documentation
+    */
+    inline static void release(const IdType& id)
+    {
+        #if 0
+        Registry::get_instance().mReleasedIds.insert({ id, id });
+        #endif
+        Registry::get_instance().release(id);
+    }
+
 private:
     class LifetimeMonitor final
     {
@@ -323,7 +342,7 @@ private:
 
         inline ~LifetimeMonitor()
         {
-            Registry::get_instance().erase(mId);
+            Registry::get_instance().release(mId);
         }
 
         inline const IdType& get_id() const
@@ -354,19 +373,25 @@ private:
     public:
         inline void insert(std::shared_ptr<LifetimeMonitor> spReference)
         {
-            assert(spReference && "References to deleted objects must be cleared upon destruction; gvk maintenance required");
+            assert(spReference && "References to deleted objects must be released upon destruction; gvk maintenance required");
             std::lock_guard<std::mutex> lock(mMutex);
             auto success = mWeakReferences.insert({ spReference->get_id(), spReference }).second;
             (void)success;
             assert(success && "Failed to insert std::shared_ptr<LifetimeMonitor>; was a Reference<> initialized with a duplicate id?");
         }
 
-        inline void erase(const IdType& id)
+        inline void release(const IdType& id)
         {
             std::lock_guard<std::mutex> lock(mMutex);
+            #if 0
+            auto released = mReleasedIds.erase(id);
+            if (!released) {
+                std::cout << "" << std::endl;
+            }
+            #endif
             auto success = mWeakReferences.erase(id);
             (void)success;
-            assert(success && "References to deleted objects must be cleared upon destruction; gvk maintenance required");
+            assert(success && "References to deleted objects must be released upon destruction; gvk maintenance required");
         }
 
         inline Reference get(const IdType& id)
@@ -377,7 +402,7 @@ private:
             if (itr != mWeakReferences.end()) {
                 reference.mId = itr->first;
                 reference.mspLifetimeMonitor = itr->second.lock();
-                assert(reference && "References to deleted objects must be cleared upon destruction; gvk maintenance required");
+                assert(reference && "References to deleted objects must be released upon destruction; gvk maintenance required");
             }
             return reference;
         }
@@ -399,6 +424,10 @@ private:
             static Registry* spRegistry{ new Registry };
             return *spRegistry;
         }
+
+        #if 0
+        std::unordered_map<IdType, IdType> mReleasedIds;
+        #endif
 
     private:
         std::mutex mMutex;
