@@ -84,3 +84,26 @@ target_link_libraries(
         stb
 )
 ```
+
+
+
+
+Tested on Ubuntu 24.04.1 LTS
+Update Linux section...
+
+sudo apt update && sudo apt upgrade
+
+sudo apt install clang
+sudo apt install cmake
+sudo apt install git
+
+clang --version
+cmake --version
+git --version
+
+export CC=/usr/bin/clang
+export CXX=/usr/bin/clang++
+Python 3 should be preinstalled
+
+Without configuration, GLFW requires...
+sudo apt install libwayland-dev libxkbcommon-dev xorg-dev

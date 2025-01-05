@@ -1,5 +1,23 @@
 
-find_package(Vulkan REQUIRED)
+include_guard(GLOBAL)
+
+set(Vulkan_SDK_VERSION 1.3.296.0)
+if(NOT ENV{VULKAN_SDK})
+    if(LINUX)
+        set(Vulkan_SDK_SHA_256 79b0a1593dadc46180526250836f3e53688a9a5fb42a0e5859eb72316dc4d53e)
+        FetchContent_Declare(
+            Vulkan_SDK_PACKAGE
+            URL "https://sdk.lunarg.com/sdk/download/${Vulkan_SDK_VERSION}/linux/vulkansdk-linux-x86_64-${Vulkan_SDK_VERSION}.tar.xz"
+            URL_HASH SHA256=${Vulkan_SDK_SHA_256}
+        )
+        FetchContent_MakeAvailable(Vulkan_SDK_PACKAGE)
+        FetchContent_GetProperties(Vulkan_SDK_PACKAGE SOURCE_DIR Vulkan_SDK_PACKAGE_DIR)
+        set(ENV{VULKAN_SDK} "${Vulkan_SDK_PACKAGE_DIR}/x86_64/")
+    else(WIN32)
+        # TODO :
+    endif()
+endif()
+find_package(Vulkan ${Vulkan_SDK_VERSION} REQUIRED)
 
 ################################################################################
 # Set Vulkan_SDK_DIR and Vulkan_XML

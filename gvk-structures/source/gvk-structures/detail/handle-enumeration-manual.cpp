@@ -34,7 +34,13 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 // Linux
 #ifdef VK_USE_PLATFORM_XLIB_KHR
-GVK_STUB_ENUMERATE_STRUCTURE_HANDLES_DEFINITION(VkXlibSurfaceCreateInfoKHR)
+#if 1
+template <>
+void enumerate_structure_handles<VkXlibSurfaceCreateInfoKHR>(const VkXlibSurfaceCreateInfoKHR& obj, EnumerateHandlesCallback callback)
+{
+    enumerate_pnext_handles(obj.pNext, callback);
+}
+#endif
 #endif // VK_USE_PLATFORM_XLIB_KHR
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -26,6 +26,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gvk-runtime.hpp"
 
+#include "gvk-environment.hpp"
+
+#include <iostream>
+
 namespace gvk {
 
 static void* sVulkanRuntime;
@@ -33,15 +37,24 @@ static void* sVulkanRuntime;
 VkResult load_vulkan_runtime()
 {
 #ifdef GVK_PLATFORM_LINUX
-    constexpr const char* const VulkanRuntimeLibraryName = "libvulkan.so.1";
+    std::cout << "VULKAN_SDK = " << get_env_var("VULKAN_SDK") << std::endl;
+    if (!sVulkanRuntime) {
+        std::cout << "hit 0" << std::endl;
+        sVulkanRuntime = gvk_dlopen("libvulkan.so.1");
+        std::cout << "    " << sVulkanRuntime << std::endl;
+    }
+    if (!sVulkanRuntime) {
+        std::cout << "hit 1" << std::endl;
+        sVulkanRuntime = gvk_dlopen("libvulkan.so");
+        std::cout << "    " << sVulkanRuntime << std::endl;
+    }
 #endif
 #ifdef GVK_PLATFORM_WINDOWS
-    constexpr const char* const VulkanRuntimeLibraryName = "vulkan-1.dll";
-#endif
     if (!sVulkanRuntime) {
-        sVulkanRuntime = gvk_dlopen(VulkanRuntimeLibraryName);
+        sVulkanRuntime = gvk_dlopen("vulkan-1.dll");
     }
-    return sVulkanRuntime ? VK_SUCCESS : VK_ERROR_FEATURE_NOT_PRESENT;
+#endif
+    return sVulkanRuntime ? VK_SUCCESS : VK_ERROR_INITIALIZATION_FAILED;
 }
 
 void unload_vulkan_runtime()
@@ -54,7 +67,7 @@ void unload_vulkan_runtime()
 
 PFN_vkGetInstanceProcAddr load_vkGetInstanceProcAddr()
 {
-    return load_vulkan_runtime() == VK_SUCCESS ? (PFN_vkGetInstanceProcAddr)gvk_dlsym(sVulkanRuntime, "vkGetInstanceProcAddr") : nullptr;
+    return (load_vulkan_runtime() == VK_SUCCESS) ? (PFN_vkGetInstanceProcAddr)gvk_dlsym(sVulkanRuntime, "vkGetInstanceProcAddr") : nullptr;
 }
 
 } // namespace gvk
