@@ -179,7 +179,7 @@ VkResult Image::create(const Device& device, const VkImageCreateInfo* pImageCrea
             }
 
             auto& imageControlBlock = pImage->mReference.get_obj();
-            assert(!imageControlBlock.mVmaAllocation && "Outstanding VmaAllocation; incorrect destruction handlning; gvk maintenance required");
+            assert(!imageControlBlock.mVmaAllocation && "Outstanding VmaAllocation, this indicates incorrect destruction handling; gvk maintenance required");
             imageControlBlock.mDevice = device;
             imageControlBlock.mVkImage = vkImage;
             imageControlBlock.mVkSwapchainKHR = VK_NULL_HANDLE;
@@ -546,7 +546,7 @@ VkResult initialize_control_block<SwapchainKHR>(SwapchainKHR& swapchain)
             }
 
             auto& imageControlBlock = images[i].mReference.get_obj();
-            assert(!imageControlBlock.mVmaAllocation && "Outstanding VmaAllocation; incorrect destruction handlning; gvk maintenance required");
+            assert(!imageControlBlock.mVmaAllocation && "Outstanding VmaAllocation, this indicates incorrect destruction handling; gvk maintenance required");
             imageControlBlock.mDevice = swapchainControlBlock.mDevice;
             imageControlBlock.mVkImage = pVkImages[i];
             imageControlBlock.mVkSwapchainKHR = swapchainControlBlock.mVkSwapchainKHR;
