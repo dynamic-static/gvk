@@ -14,14 +14,6 @@ A collection of Vulkan C++ utilities with a general focus on tools development, 
  - Vulkan XML parsing utilities (used to keep the project up to date with the vk.xml)
  - ...and more...
 
-# Jump to section
-
-[Getting Started](# Getting Started)
-+ [Install Dependencies](#### Install Dependencies)
-+ [Configure and Build](#### Configure and Build)
-
-[External Use](# External Use)
-
 # Samples
 [<img src="samples/screens/gvk-getting-started-00-triangle.png" width="320" height="180">](samples/gvk-getting-started-00-triangle.cpp)
 [<img src="samples/screens/gvk-getting-started-01-mesh.png" width="320" height="180">](samples/gvk-getting-started-01-mesh.cpp)
@@ -31,7 +23,7 @@ A collection of Vulkan C++ utilities with a general focus on tools development, 
 [<img src="samples/screens/gvk-getting-started-05-gui.gif" width="320" height="180">](samples/gvk-getting-started-05-gui.cpp)
 
 # Getting Started
-#### Install Dependencies
+### Install Dependencies
 + ###### Windows 11
 Ensure the following tools are installed, for Windows download and install from the provided links...
  - [CMake](https://cmake.org/download/) v3.3+ (Make sure to select "Add to PATH" when prompted)
@@ -54,7 +46,7 @@ Configure your environment to use an installed Vulkan SDK  (optional, GVK will d
 source <vulkan/sdk/path>/setup-env.sh
 ```
 
-#### Configure and Build
+### Configure and Build
 ###### ~15-40 min depending on options/configuration
 ```
 git clone https://github.com/intel/gvk.git
