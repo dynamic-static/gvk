@@ -33,8 +33,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <vector>
 
-#include <iostream>
-
 namespace gvk {
 
 VkResult Context::create(const CreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, Context* pContext)
@@ -72,12 +70,7 @@ VkResult Context::create(const CreateInfo* pCreateInfo, const VkAllocationCallba
         instanceCreateInfo.ppEnabledLayerNames = !layers.empty() ? layers.data() : nullptr;
         instanceCreateInfo.enabledExtensionCount = (uint32_t)instanceExtensions.size();
         instanceCreateInfo.ppEnabledExtensionNames = !instanceExtensions.empty() ? instanceExtensions.data() : nullptr;
-
-        std::cout << gvk::to_string(instanceCreateInfo, gvk::Printer::Default & ~gvk::Printer::EnumValue) << std::endl;
-
-        std::cout << "About to call create_instance()" << std::endl;
         gvk_result(pContext->create_instance(&instanceCreateInfo, &controlBlock.mInstance));
-        std::cout << "Returned from create_instance()" << std::endl;
 
         controlBlock.mPhysicalDevices = pContext->sort_physical_devices(controlBlock.mInstance.get<PhysicalDevices>());
 

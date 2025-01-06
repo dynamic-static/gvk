@@ -35,7 +35,6 @@ namespace gvk {
 ////////////////////////////////////////////////////////////////////////////////
 // Linux
 #ifdef VK_USE_PLATFORM_XLIB_KHR
-#if 1
 template <> void print<VkXlibSurfaceCreateInfoKHR>(Printer& printer, const VkXlibSurfaceCreateInfoKHR& obj)
 {
     printer.print_object(
@@ -49,7 +48,6 @@ template <> void print<VkXlibSurfaceCreateInfoKHR>(Printer& printer, const VkXli
         }
     );
 }
-#endif
 #endif // VK_USE_PLATFORM_XLIB_KHR
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -26,10 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gvk-sample-utilities.hpp"
 
-#include "gvk-runtime.hpp"
-
-#include <iostream>
-
 int main(int, const char*[])
 {
     // We'll start by opening a gvk_result_scope...this will declare a VkResult in
@@ -40,56 +36,6 @@ int main(int, const char*[])
     //  destructors and desctructor order) apply...in debug configurations, it will
     //  simply assert()...
     gvk_result_scope_begin(VK_ERROR_INITIALIZATION_FAILED) {
-
-#if 0
-        std::cout << gvk_file_line << std::endl;
-        std::cout << gvk_file_line << std::endl;
-        auto pfn_vkGetInstanceProcAddr = gvk::load_vkGetInstanceProcAddr();
-        std::cout << gvk_file_line << std::endl;
-        assert(pfn_vkGetInstanceProcAddr);
-
-        std::cout << gvk_file_line << std::endl;
-        auto pfn_vkEnumerateInstanceLayerProperties = (PFN_vkEnumerateInstanceLayerProperties)pfn_vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkEnumerateInstanceLayerProperties");
-        std::cout << gvk_file_line << std::endl;
-
-        std::cout << "pfn_vkEnumerateInstanceLayerProperties " << (void*)pfn_vkEnumerateInstanceLayerProperties << std::endl;
-
-        uint32_t instanceLayerPropertyCount = 0;
-        std::cout << gvk_file_line << std::endl;
-        gvk_result(pfn_vkEnumerateInstanceLayerProperties(&instanceLayerPropertyCount, nullptr));
-        std::cout << gvk_file_line << std::endl;
-        std::vector<VkLayerProperties> instanceLayerProperties(instanceLayerPropertyCount);
-        std::cout << gvk_file_line << std::endl;
-        gvk_result(pfn_vkEnumerateInstanceLayerProperties(&instanceLayerPropertyCount, instanceLayerProperties.data()));
-        std::cout << gvk_file_line << std::endl;
-        std::cout << "instanceLayerPropertyCount : " << instanceLayerPropertyCount << std::endl;
-        for (const auto& instanceLayerProperty : instanceLayerProperties) {
-            std::cout << gvk::to_string(instanceLayerProperty) << std::endl;
-        }
-
-        auto pfn_vkEnumerateInstanceExtensionProperties = (PFN_vkEnumerateInstanceExtensionProperties)pfn_vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkEnumerateInstanceExtensionProperties");
-        uint32_t instanceExtensionPropertyCount = 0;
-        gvk_result(pfn_vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionPropertyCount, nullptr));
-        std::vector<VkExtensionProperties> instanceExtensionProperties(instanceExtensionPropertyCount);
-        gvk_result(pfn_vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionPropertyCount, instanceExtensionProperties.data()));
-                std::cout << "instanceExtensionPropertyCount : " << instanceExtensionPropertyCount << std::endl;
-        for (const auto& instanceExtensionProperty : instanceExtensionProperties) {
-            std::cout << gvk::to_string(instanceExtensionProperty) << std::endl;
-        }
-
-        auto pfn_vkCreateInstance = (PFN_vkCreateInstance)pfn_vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkCreateInstance");
-        auto instanceCreateInfo = gvk::get_default<VkInstanceCreateInfo>();
-        VkInstance instance = VK_NULL_HANDLE;
-        gvk_result(pfn_vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
-        std::cout << "HIT 1 " << gvk_file_line << std::endl;
-#endif
-
-        // {
-        //     gvk::Context ocontext;
-        //     std::cout << gvk_file_line << std::endl;
-        //     gvk_result(gvk::Context::create(&gvk::get_default<gvk::Context::CreateInfo>(), nullptr, &ocontext));
-        //     std::cout << gvk_file_line << std::endl;
-        // }
 
         // Now we create a GvkSampleContext.  gvk::Context handles initialization of
         //  gvk::Instance, gvk::Device(s), and several other utility objects.

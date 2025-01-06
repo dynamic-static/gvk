@@ -26,9 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-// #ifndef VK_NO_PROTOTYPES
-// #define VK_NO_PROTOTYPES
-// #endif
 #include "gvk-defines.hpp"
 #include "gvk-format-info.hpp"
 #include "gvk-gui.hpp"
@@ -109,13 +106,11 @@ public:
             auto deviceCreateInfo = gvk::get_default<VkDeviceCreateInfo>();
             deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
 
-            #if 1
             // VkDebugUtilsMessengerCreateInfoEXT is an optional member of gvk::Context::CreateInfo.
             //  Providing a VkDebugUtilsMessengerCreateInfoEXT indicates that the debug
             //  utils extension should be loaded.
             auto debugUtilsMessengerCreateInfo = gvk::get_default<VkDebugUtilsMessengerCreateInfoEXT>();
             debugUtilsMessengerCreateInfo.pfnUserCallback = debug_utils_messenger_callback;
-            #endif
 
             // Populate the gvk::Context::CreateInfo and call the base implementation.
             auto contextCreateInfo = gvk::get_default<gvk::Context::CreateInfo>();
@@ -123,14 +118,12 @@ public:
             contextCreateInfo.loadApiDumpLayer = VK_FALSE;    // TODO : Check layer properties before attempting to load
             contextCreateInfo.loadValidationLayer = VK_FALSE; // TODO : Check layer properties before attempting to load
             contextCreateInfo.loadWsiExtensions = VK_TRUE;
-            #if 1
             contextCreateInfo.pDebugUtilsMessengerCreateInfo = &debugUtilsMessengerCreateInfo;
-            #endif
             contextCreateInfo.pDeviceCreateInfo = &deviceCreateInfo;
             gvk_result(gvk::Context::create(&contextCreateInfo, nullptr, pGvkSampleContext));
-    #ifdef VK_NO_PROTOTYPES
+#ifdef VK_NO_PROTOTYPES
             gvk_sample_set_entry_points(pGvkSampleContext->get<gvk::Devices>()[0]);
-    #endif
+#endif
         } gvk_result_scope_end;
         return gvkResult;
     }
@@ -263,8 +256,6 @@ inline VkResult gvk_sample_create_wsi_context(const gvk::Context& gvkContext, co
         xlibSurfaceCreateInfo.dpy = systemSurface.get<gvk::system::Surface::PlatformInfo>().x11Display;
         xlibSurfaceCreateInfo.window = systemSurface.get<gvk::system::Surface::PlatformInfo>().x11Window;
         pSurfaceCreateInfo = (VkBaseInStructure*)&xlibSurfaceCreateInfo;
-        std::cout << "x11Display " << systemSurface.get<gvk::system::Surface::PlatformInfo>().x11Display << std::endl;
-        std::cout << "x11Window " << systemSurface.get<gvk::system::Surface::PlatformInfo>().x11Window << std::endl;
 #endif
 #ifdef VK_USE_PLATFORM_WIN32_KHR
         auto win32SurfaceCreateInfo = gvk::get_default<VkWin32SurfaceCreateInfoKHR>();

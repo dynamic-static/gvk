@@ -74,9 +74,7 @@ int main(int, const char*[])
         }
 
         // Linux
-        #if 1
         apiElements.manuallyImplemented.insert("VkXlibSurfaceCreateInfoKHR");
-        #endif
         // Win32
         apiElements.manuallyImplemented.insert("VkExportFenceWin32HandleInfoKHR");
         apiElements.manuallyImplemented.insert("VkExportMemoryWin32HandleInfoKHR");
@@ -125,9 +123,6 @@ int main(int, const char*[])
         apiElements.manuallyImplemented.insert("VkAccelerationStructureSRTMotionInstanceNV");
         apiElements.manuallyImplemented.insert("VkRayTracingShaderGroupCreateInfoKHR");
         apiElements.manuallyImplemented.insert("VkSurfaceFullScreenExclusiveWin32InfoEXT");
-        #if 0
-        apiElements.manuallyImplemented.insert("VkXlibSurfaceCreateInfoKHR");
-        #endif
         apiElements.manuallyImplemented.insert("VkWin32SurfaceCreateInfoKHR");
 
         gvk::cppgen::StructureCerealizationGenerator::generate(manifest, apiElements);

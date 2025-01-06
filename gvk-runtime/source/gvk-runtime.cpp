@@ -26,10 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gvk-runtime.hpp"
 
-#include "gvk-environment.hpp"
-
-#include <iostream>
-
 namespace gvk {
 
 static void* sVulkanRuntime;
@@ -37,16 +33,11 @@ static void* sVulkanRuntime;
 VkResult load_vulkan_runtime()
 {
 #ifdef GVK_PLATFORM_LINUX
-    std::cout << "VULKAN_SDK = " << get_env_var("VULKAN_SDK") << std::endl;
     if (!sVulkanRuntime) {
-        std::cout << "hit 0" << std::endl;
         sVulkanRuntime = gvk_dlopen("libvulkan.so.1");
-        std::cout << "    " << sVulkanRuntime << std::endl;
     }
     if (!sVulkanRuntime) {
-        std::cout << "hit 1" << std::endl;
         sVulkanRuntime = gvk_dlopen("libvulkan.so");
-        std::cout << "    " << sVulkanRuntime << std::endl;
     }
 #endif
 #ifdef GVK_PLATFORM_WINDOWS

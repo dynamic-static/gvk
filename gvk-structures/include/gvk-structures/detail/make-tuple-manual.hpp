@@ -36,7 +36,6 @@ namespace gvk {
 ////////////////////////////////////////////////////////////////////////////////
 // Linux
 #ifdef VK_USE_PLATFORM_XLIB_KHR
-#if 1
 inline auto make_tuple(const VkXlibSurfaceCreateInfoKHR& obj)
 {
     return std::make_tuple(
@@ -47,7 +46,6 @@ inline auto make_tuple(const VkXlibSurfaceCreateInfoKHR& obj)
         obj.window
     );
 }
-#endif
 #endif // VK_USE_PLATFORM_XLIB_KHR
 
 ////////////////////////////////////////////////////////////////////////////////
