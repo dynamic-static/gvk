@@ -24,14 +24,14 @@ A collection of Vulkan C++ utilities with a general focus on tools development, 
 
 # Getting Started
 ### Install Dependencies
-+ ###### Windows 11
+###### Windows 11
 Ensure the following tools are installed, for Windows download and install from the provided links...
  - [CMake](https://cmake.org/download/) v3.3+ (Make sure to select "Add to PATH" when prompted)
  - [Git](https://git-scm.com/)
  - [Python](https://www.python.org/downloads/) v3+ (Make sure to select "Add to PATH" when prompted)
  - [Visual Studio](https://visualstudio.microsoft.com/vs/community/) 2022 (Make sure to select "Desktop development with C++" when prompted)
   - [Vulkan SDK](https://vulkan.lunarg.com/sdk/home) v1.3.296.0 (optional, GVK will download the correct version during configuration if necessary)
-+ ###### Ubuntu 22.04
+###### Ubuntu 22.04
 ```
 sudo apt update && sudo apt upgrade
 sudo apt install cmake
@@ -52,14 +52,14 @@ source <vulkan/sdk/path>/setup-env.sh
 git clone https://github.com/intel/gvk.git
 cd gvk
 ```
-+ ###### Windows 11
+###### Windows 11
 ```
 cmake -G "Visual Studio 17 2022" -A x64 -B build
 cmake --build build
 ```
 On Windows, a build can be run from the command line using `cmake --build build` or from Visual Studio by opening `gvk/build/gvk.sln`.
 To run the first sample, navigate to `gvk/samples/getting-started-00-triangle` in Visual Studio, right click and select "Set as Startup Project", then run the project.
-+ ###### Ubuntu 22.04
+###### Ubuntu 22.04
 ```
 cmake -B build
 cmake --build build
