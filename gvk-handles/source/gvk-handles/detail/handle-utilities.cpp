@@ -71,6 +71,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <cassert>
 
+#include <iostream>
+
 namespace gvk {
 
 const QueueFamily& get_queue_family(const Device& device, uint32_t queueFamilyIndex)
@@ -159,6 +161,8 @@ VkResult Buffer::create(const Device& device, const VkBufferCreateInfo* pCreateI
     return Buffer::create(device, pCreateInfo, (VkAllocationCallbacks*)pAllocator, pBuffer);
 }
 
+static std::set<VkImage> sVkImages;
+
 VkResult Image::create(const Device& device, const VkImageCreateInfo* pImageCreateInfo, const VmaAllocationCreateInfo* pAllocationCreateInfo, Image* pImage)
 {
     gvk_result_scope_begin(VK_ERROR_INITIALIZATION_FAILED) {
@@ -167,13 +171,41 @@ VkResult Image::create(const Device& device, const VkImageCreateInfo* pImageCrea
             VkImage vkImage = VK_NULL_HANDLE;
             VmaAllocation vmaAllocation = VK_NULL_HANDLE;
             gvk_result(vmaCreateImage(device.get<VmaAllocator>(), pImageCreateInfo, pAllocationCreateInfo, &vkImage, &vmaAllocation, nullptr));
-            pImage->mReference.reset(newref, { device, vkImage });
+
+            sVkImages.insert(vkImage);
+
+            Image duplicate({ device, vkImage });
+            if (duplicate) {
+                std::cout << "Duplicate Image " << gvk::to_string(vkImage) << "\n";
+                std::cout << "VkSwapchainKHR " << gvk::to_string(duplicate.get<VkSwapchainKHR>()) << "\n";
+                std::cout << "VmaAllocation " << gvk::to_hex_string(duplicate.get<VmaAllocation>()) << "\n";
+                std::cout << "Original VkImageCreateInfo " << gvk::to_string(duplicate.get<VkImageCreateInfo>()) << "\n";
+                std::cout << "New VkImageCreateInfo " << gvk::to_string(*pImageCreateInfo) << std::endl;
+                assert(!duplicate.get<VmaAllocation>());
+            }
+
+
+            // TODO : Documentation
+            // NOTE : Images may be reused, so use existing reference if present.
+            // NOTE : This does "update" outstanding references, but they should all be
+            //  considered invalid after swapchain creation/destruction anyway.
+            // NOTE : It would be possible to modify gvk::Reference<> to have a 'force'
+            //  option that would update an existing reference if a duplicate id is provided
+            //  when creating a gvk::newref, but I'd rather not modify gvk::Reference<> like
+            //  that just to support this very specific edge-case.
+            *pImage = Image({ device, vkImage });
+            if (!*pImage) {
+                pImage->mReference.reset(newref, { device, vkImage });
+            }
+
+
             auto& imageControlBlock = pImage->mReference.get_obj();
-            imageControlBlock.mVkImage = vkImage;
             imageControlBlock.mDevice = device;
-            imageControlBlock.mImageCreateInfo = *pImageCreateInfo;
+            imageControlBlock.mVkImage = vkImage;
+            imageControlBlock.mVkSwapchainKHR = VK_NULL_HANDLE;
             imageControlBlock.mVmaAllocation = vmaAllocation;
             imageControlBlock.mVmaAllocationCreateInfo = *pAllocationCreateInfo;
+            imageControlBlock.mImageCreateInfo = *pImageCreateInfo;
             gvk_result(detail::initialize_control_block(imageControlBlock));
         }
     } gvk_result_scope_end;
@@ -524,13 +556,24 @@ VkResult initialize_control_block<SwapchainKHR>(SwapchainKHR& swapchain)
         imageCreateInfo.pQueueFamilyIndices = swapchainCreateInfo.pQueueFamilyIndices;
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         for (uint32_t i = 0; i < swapchainImageCount; ++i) {
+            // TODO : Documentation
+            // NOTE : Images may be reused, so use existing reference if present.
+            // NOTE : This does "update" outstanding references, but they should all be
+            //  considered invalid after swapchain creation/destruction anyway.
+            // NOTE : It would be possible to modify gvk::Reference<> to have a 'force'
+            //  option that would update an existing reference if a duplicate id is provided
+            //  when creating a gvk::newref, but I'd rather not modify gvk::Reference<> like
+            //  that just to support this very specific edge-case.
             images[i] = Image({ swapchainControlBlock.mDevice, pVkImages[i] });
             if (!images[i]) {
                 images[i].mReference.reset(newref, { swapchainControlBlock.mDevice, pVkImages[i] });
             }
             auto& imageControlBlock = images[i].mReference.get_obj();
-            imageControlBlock.mVkImage = pVkImages[i];
+
+            assert(!imageControlBlock.mVmaAllocation);
+
             imageControlBlock.mDevice = swapchainControlBlock.mDevice;
+            imageControlBlock.mVkImage = pVkImages[i];
             imageControlBlock.mVkSwapchainKHR = swapchainControlBlock.mVkSwapchainKHR;
             imageControlBlock.mImageCreateInfo = imageCreateInfo;
             gvk_result(detail::initialize_control_block(imageControlBlock));
@@ -553,6 +596,10 @@ Instance::ControlBlock::~ControlBlock()
 
 Device::ControlBlock::~ControlBlock()
 {
+    for (auto vkImage : sVkImages) {
+        std::cout << "Image created but never destroyed : " << gvk::to_string(vkImage) << "\n";
+    }
+    std::cout << sVkImages.size() << " images created but never destroyed" << std::endl;
     if (mVmaAllocator) {
         vmaDestroyAllocator(mVmaAllocator);
     }
@@ -582,6 +629,7 @@ Image::ControlBlock::~ControlBlock()
         assert(mDevice);
         if (mVmaAllocation) {
             vmaDestroyImage(mDevice.get<VmaAllocator>(), mVkImage, mVmaAllocation);
+            sVkImages.erase(mVkImage);
         } else {
             const auto& dispatchTable = mDevice.get<DispatchTable>();
             assert(dispatchTable.gvkDestroyImage);
@@ -592,6 +640,7 @@ Image::ControlBlock::~ControlBlock()
 
 SwapchainKHR::ControlBlock::~ControlBlock()
 {
+    #if 0
     for (auto& image : mImages) {
         auto& imageControlBlock = image.mReference.get_obj();
         imageControlBlock.mDevice = VK_NULL_HANDLE;
@@ -602,6 +651,7 @@ SwapchainKHR::ControlBlock::~ControlBlock()
         imageControlBlock.mImageCreateInfo.reset();
         image.mReference.release();
     }
+    #endif
     const auto& dispatchTable = mDevice.get<DispatchTable>();
     assert(dispatchTable.gvkDestroySwapchainKHR);
     dispatchTable.gvkDestroySwapchainKHR(mDevice, mVkSwapchainKHR, (mAllocationCallbacks.pfnFree ? &mAllocationCallbacks : nullptr));

@@ -320,6 +320,7 @@ public:
         return Registry::get_instance().enumerate(processReference);
     }
 
+    #if 0
     /**
     TODO : Documentation
     */
@@ -330,6 +331,7 @@ public:
         #endif
         Registry::get_instance().release(id);
     }
+    #endif
 
 private:
     class LifetimeMonitor final

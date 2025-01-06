@@ -107,3 +107,7 @@ Python 3 should be preinstalled
 
 Without configuration, GLFW requires...
 sudo apt install libwayland-dev libxkbcommon-dev xorg-dev
+
+If the required Vulkan SDK version isn't installed, it will be downloaded to
+/build/_deps/vulkan_sdk_package-src/
+To use layers run setup-env.sh
