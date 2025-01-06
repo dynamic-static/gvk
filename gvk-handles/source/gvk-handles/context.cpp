@@ -71,7 +71,6 @@ VkResult Context::create(const CreateInfo* pCreateInfo, const VkAllocationCallba
         instanceCreateInfo.enabledExtensionCount = (uint32_t)instanceExtensions.size();
         instanceCreateInfo.ppEnabledExtensionNames = !instanceExtensions.empty() ? instanceExtensions.data() : nullptr;
         gvk_result(pContext->create_instance(&instanceCreateInfo, &controlBlock.mInstance));
-
         controlBlock.mPhysicalDevices = pContext->sort_physical_devices(controlBlock.mInstance.get<PhysicalDevices>());
 
         // Create gvk::DebugUtilsMessengerEXT

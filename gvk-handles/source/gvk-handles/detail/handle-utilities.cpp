@@ -71,8 +71,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <cassert>
 
-#include <iostream>
-
 namespace gvk {
 
 const QueueFamily& get_queue_family(const Device& device, uint32_t queueFamilyIndex)

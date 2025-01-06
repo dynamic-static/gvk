@@ -82,7 +82,7 @@ private:
         std::cerr << pFileLine << std::endl;
         std::cerr << pGvkCall << std::endl;
         std::cerr << gvk::to_string(vkResult, gvk::Printer::Default & ~gvk::Printer::EnumValue) << std::endl;
-        return VK_TRUE;
+        return VK_TRUE; // NOTE : In Debug configurations, return VK_FALSE to assert(false)
     }
 
 public:
