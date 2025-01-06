@@ -172,7 +172,7 @@ VkResult Image::create(const Device& device, const VkImageCreateInfo* pImageCrea
 
             // NOTE : Images may be reused, so use existing reference if present.
             // NOTE : This does "update" outstanding references, but they are considered
-            //  invalid after destruction anyway.  eg. after vkDestroySwapchainKHR().
+            //  invalid after destruction anyway. eg. after vkDestroySwapchainKHR().
             *pImage = Image({ device, vkImage });
             if (!*pImage) {
                 pImage->mReference.reset(newref, { device, vkImage });
