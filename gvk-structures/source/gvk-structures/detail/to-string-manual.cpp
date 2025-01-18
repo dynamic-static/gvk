@@ -35,7 +35,19 @@ namespace gvk {
 ////////////////////////////////////////////////////////////////////////////////
 // Linux
 #ifdef VK_USE_PLATFORM_XLIB_KHR
-GVK_STUB_TO_STRING_DEFINITION(VkXlibSurfaceCreateInfoKHR)
+template <> void print<VkXlibSurfaceCreateInfoKHR>(Printer& printer, const VkXlibSurfaceCreateInfoKHR& obj)
+{
+    printer.print_object(
+        [&]()
+        {
+            printer.print_field("sType", obj.sType);
+            detail::print_pnext(printer, obj.pNext);
+            printer.print_field("flags", obj.flags);
+            printer.print_field("dpy", obj.dpy);
+            printer.print_field("window", obj.window);
+        }
+    );
+}
 #endif // VK_USE_PLATFORM_XLIB_KHR
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -532,6 +544,51 @@ void print<VkTransformMatrixKHR>(Printer& printer, const VkTransformMatrixKHR& o
                     printer.mOstrm << " ]";
                 }
             );
+        }
+    );
+}
+
+template <>
+void print<VkWriteDescriptorSet>(Printer& printer, const VkWriteDescriptorSet& obj)
+{
+    printer.print_object(
+        [&]()
+        {
+            printer.print_field("sType", obj.sType);
+            detail::print_pnext(printer, obj.pNext);
+            printer.print_field("dstSet", obj.dstSet);
+            printer.print_field("dstBinding", obj.dstBinding);
+            printer.print_field("dstArrayElement", obj.dstArrayElement);
+            printer.print_field("descriptorCount", obj.descriptorCount);
+            printer.print_field("descriptorType", obj.descriptorType);
+            switch (obj.descriptorType) {
+            case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+            case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+            case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
+            case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC: {
+                printer.print_array("pBufferInfo", obj.descriptorCount, obj.pBufferInfo);
+            } break;
+            case VK_DESCRIPTOR_TYPE_SAMPLER:
+            case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+            case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+            case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+            case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT: {
+                printer.print_array("pImageInfo", obj.descriptorCount, obj.pImageInfo);
+            } break;
+            case VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:
+            case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER: {
+                printer.print_array("pTexelBufferView", obj.descriptorCount, obj.pTexelBufferView);
+            } break;
+            case VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK:
+            case VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR:
+            case VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV:
+            case VK_DESCRIPTOR_TYPE_SAMPLE_WEIGHT_IMAGE_QCOM:
+            case VK_DESCRIPTOR_TYPE_BLOCK_MATCH_IMAGE_QCOM:
+            case VK_DESCRIPTOR_TYPE_MUTABLE_EXT:
+            default: {
+                // NOOP :
+            } break;
+            }
         }
     );
 }

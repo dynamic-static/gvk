@@ -35,7 +35,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <memory>
 #include <mutex>
+#include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace gvk {
@@ -86,6 +88,9 @@ public:
     using ApplicationVkPhysicalDevice = VkPhysicalDevice;
     using LoaderVkPhysicalDevice = VkPhysicalDevice;
     std::unordered_map<ApplicationVkPhysicalDevice, LoaderVkPhysicalDevice> VkPhysicalDevices;
+    PFN_vkGetInstanceProcAddr pfn_vkGetInstanceProcAddr{ nullptr };
+    PFN_vkLayerCreateDevice pfn_vkLayerCreateDevice{ nullptr };
+    PFN_vkLayerDestroyDevice pfn_vkLayerDestroyDevice{ nullptr };
 
 private:
     Registry() = default;

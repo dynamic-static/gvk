@@ -9,6 +9,10 @@ include(FetchContent)
 
 find_package(Git REQUIRED)
 
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+endif()
+
 set(gvkBuildModuleDirectory "${CMAKE_CURRENT_LIST_DIR}")
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -150,7 +154,7 @@ endfunction()
 macro(gvk_add_target_test)
     if(gvk-build-tests)
         cmake_parse_arguments(ARGS "" "TARGET;FOLDER" "LINK_LIBRARIES;INCLUDE_DIRECTORIES;INCLUDE_FILES;SOURCE_FILES;COMPILE_DEFINITIONS" ${ARGN})
-        list(APPEND ARGS_LINK_LIBRARIES gtest_main)
+        list(APPEND ARGS_LINK_LIBRARIES gtest gtest_main)
         get_target_property(type ${ARGS_TARGET} TYPE)
         if(type STREQUAL STATIC_LIBRARY)
             list(APPEND ARGS_LINK_LIBRARIES ${ARGS_TARGET})
@@ -232,11 +236,27 @@ function(gvk_install_artifacts)
     write_basic_package_version_file("${configVersion}" VERSION ${ARGS_VERSION} COMPATIBILITY ExactVersion)
     set(configTemplate "${gvkBuildModuleDirectory}/gvk-target.config.cmake.in")
     set(config "${CMAKE_BINARY_DIR}/cmake/${ARGS_TARGET}Config.cmake")
+    
+    # NOTE : Get INTERFACE_LINK_LIBRARIES and use it to create a list of targets
+    #   the current target depends on.  Remove CMake syntax, system libraries, and
+    #   Vulkan.  The resulting list is used on import to ensure all dependencies of
+    #   the current target that are defined by the GVK build are imported.
+    # NOTE : Kinda kludgy, but INTERFACE_LINK_LIBRARIES seems to be the best option
     get_target_property(interfaceLinkLibraries ${ARGS_TARGET} INTERFACE_LINK_LIBRARIES)
     string(REPLACE "$" "" interfaceLinkLibraries "${interfaceLinkLibraries}")
     string(REPLACE "<LINK_ONLY:" "" interfaceLinkLibraries "${interfaceLinkLibraries}")
     string(REPLACE ">" "" interfaceLinkLibraries "${interfaceLinkLibraries}")
-    list(REMOVE_ITEM interfaceLinkLibraries ${CMAKE_DL_LIBS} rt Threads::Threads Vulkan::Vulkan)
+    list(REMOVE_ITEM interfaceLinkLibraries ${CMAKE_DL_LIBS} m rt Threads::Threads Vulkan::Vulkan)
+    foreach(interfaceLinkLibrary IN LISTS interfaceLinkLibraries)
+        string(FIND "${interfaceLinkLibrary}" "libm.a" i0)
+        string(FIND "${interfaceLinkLibrary}" "libm.so" i1)
+        string(FIND "${interfaceLinkLibrary}" "librt.a" i2)
+        string(FIND "${interfaceLinkLibrary}" "librt.so" i3)
+        if(i0 GREATER_EQUAL 0 OR i1 GREATER_EQUAL 0 OR i2 GREATER_EQUAL 0 OR i3 GREATER_EQUAL 0)
+            list(REMOVE_ITEM interfaceLinkLibraries "${interfaceLinkLibrary}")
+        endif()
+    endforeach()
+
     configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION {CMAKE_BINARY_DIR}/cmake/)
     install(FILES "${config}" "${configVersion}" DESTINATION cmake/${ARGS_TARGET}/)
 endfunction()
@@ -259,8 +279,26 @@ function(gvk_install_headers)
 endfunction()
 
 function(gvk_install_layer)
-    cmake_parse_arguments(ARGS "" "TARGET" "" ${ARGN})
-    gvk_install_artifacts(${ARGV})
+    cmake_parse_arguments(ARGS "" "TARGET;VERSION" "" ${ARGN})
+    if(NOT ARGS_VERSION)
+        get_target_property(ARGS_VERSION ${ARGS_TARGET} VERSION)
+        if(NOT ARGS_VERSION)
+            gvk_get_commit_hash(ARGS_VERSION)
+        endif()
+    endif()
+    install(
+        TARGETS ${ARGS_TARGET}
+        EXPORT ${ARGS_TARGET}Targets
+        LIBRARY DESTINATION lib/$<CONFIG>/
+        ARCHIVE DESTINATION lib/$<CONFIG>/
+        RUNTIME DESTINATION bin/$<CONFIG>/
+    )
+    set(configVersion "${CMAKE_BINARY_DIR}/cmake/${ARGS_TARGET}ConfigVersion.cmake")
+    write_basic_package_version_file("${configVersion}" VERSION ${ARGS_VERSION} COMPATIBILITY ExactVersion)
+    set(configTemplate "${gvkBuildModuleDirectory}/gvk-target.config.cmake.in")
+    set(config "${CMAKE_BINARY_DIR}/cmake/${ARGS_TARGET}Config.cmake")
+    configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION {CMAKE_BINARY_DIR}/cmake/)
+    install(FILES "${config}" "${configVersion}" DESTINATION cmake/${ARGS_TARGET}/)
     install(FILES "$<TARGET_FILE_DIR:${ARGS_TARGET}>/${ARGS_TARGET}.json" DESTINATION bin/$<CONFIG>/)
 endfunction()
 
@@ -271,7 +309,14 @@ function(gvk_install_package)
         string(REPLACE "Config.cmake" "" exportedTargetName "${exportedConfigFileName}")
         list(APPEND exportedTargets ${exportedTargetName})
     endforeach()
-    list(REMOVE_ITEM exportedTargets gvk)
+    list(REMOVE_ITEM exportedTargets
+        gvk
+        # NOTE : Consuming projects shouldn't need to have CMake imports for the layers.
+        #   Each layer installs a JSON configuration recognized by the Vulkan loader.
+        VK_LAYER_INTEL_gvk_restore_point
+        VK_LAYER_INTEL_gvk_state_tracker
+        VK_LAYER_INTEL_gvk_virtual_swapchain
+    )
     gvk_get_commit_hash(version)
     set(configVersion "${CMAKE_BINARY_DIR}/cmake/gvkConfigVersion.cmake")
     write_basic_package_version_file("${configVersion}" VERSION ${version} COMPATIBILITY ExactVersion)
