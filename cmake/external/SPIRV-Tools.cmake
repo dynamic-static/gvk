@@ -29,7 +29,7 @@ target_compile_options(SPIRV-Tools-shared PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/w>)
 if(CMAKE_FOLDER)
     set(currentCmakeFolder ${CMAKE_FOLDER})
 endif()
-set(CMAKE_FOLDER "${GVK_IDE_FOLDER}/external/SPIRV-Tools/")
+set(CMAKE_FOLDER "${gvk-ide-folder}/external/SPIRV-Tools/")
 
 set_target_properties(core_tables                                      PROPERTIES FOLDER "${CMAKE_FOLDER}")
 set_target_properties(enum_string_mapping                              PROPERTIES FOLDER "${CMAKE_FOLDER}")

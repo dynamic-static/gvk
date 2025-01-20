@@ -19,7 +19,7 @@ FetchContent_GetProperties(SPIRV-Cross SOURCE_DIR SPIRV-Cross_SOURCE_DIR)
 
 macro(gvk_setup_spirv_cross_target spirvCrossTarget)
     list(APPEND spirvCrossLibraries ${spirvCrossTarget})
-    set_target_properties(${spirvCrossTarget} PROPERTIES FOLDER "${GVK_IDE_FOLDER}/external/SPIRV-Cross/")
+    set_target_properties(${spirvCrossTarget} PROPERTIES FOLDER "${gvk-ide-folder}/external/SPIRV-Cross/")
     if(gvk-SPIRV-Cross_INSTALL_ARTIFACTS)
         gvk_install_artifacts(TARGET ${spirvCrossTarget} VERSION ${SPIRV-Cross_VERSION})
     endif()

@@ -28,7 +28,7 @@ set_target_properties(SPIRV PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${SPIRV_IN
 
 macro(gvk_setup_glslang_target glslangTarget)
     list(APPEND glslangLibraries ${glslangTarget})
-    set_target_properties(${glslangTarget} PROPERTIES FOLDER "${GVK_IDE_FOLDER}/external/glslang/")
+    set_target_properties(${glslangTarget} PROPERTIES FOLDER "${gvk-ide-folder}/external/glslang/")
     if(gvk-glslang_INSTALL_ARTIFACTS)
         gvk_install_artifacts(TARGET ${glslangTarget} VERSION ${glslang_VERSION})
     endif()

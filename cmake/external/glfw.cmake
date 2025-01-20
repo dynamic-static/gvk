@@ -16,7 +16,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glfw)
 FetchContent_GetProperties(glfw SOURCE_DIR glfw_SOURCE_DIR)
-set(folder "${GVK_IDE_FOLDER}/external/glfw/")
+set(folder "${gvk-ide-folder}/external/glfw/")
 set_target_properties(glfw PROPERTIES FOLDER "${folder}")
 set_target_properties(update_mappings PROPERTIES FOLDER "${folder}")
 

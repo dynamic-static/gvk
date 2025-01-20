@@ -12,7 +12,7 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(glm)
-set_target_properties(glm PROPERTIES FOLDER "${GVK_IDE_FOLDER}/external/")
+set_target_properties(glm PROPERTIES FOLDER "${gvk-ide-folder}/external/")
 
 if(gvk-glm_INSTALL_ARTIFACTS)
     gvk_install_artifacts(TARGET glm-header-only VERSION ${glm_VERSION})

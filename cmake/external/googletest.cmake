@@ -14,7 +14,7 @@ FetchContent_Declare(
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
-set(folder "${GVK_IDE_FOLDER}/external/gtest/")
+set(folder "${gvk-ide-folder}/external/gtest/")
 set_target_properties(gtest PROPERTIES FOLDER "${folder}")
 set_target_properties(gtest_main PROPERTIES FOLDER "${folder}")
 include(GoogleTest)
