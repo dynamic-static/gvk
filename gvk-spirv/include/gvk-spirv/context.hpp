@@ -247,7 +247,7 @@ GLSL for a vertex shader that draws a full screen triangle
     out gl_PerVertex { vec4 gl_Position; };
     void main()
     {
-        fsTexcoord = vec2((gl_vertexIndex << 1) & 2, gl_VertexIndex & 2);
+        fsTexcoord = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
         gl_Position = vec4(fsTexcoord * 2 - 1, 0, 1);
     }
 @endcode
