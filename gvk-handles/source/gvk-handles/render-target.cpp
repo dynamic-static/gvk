@@ -132,6 +132,9 @@ VkResult RenderTarget::create(const Device& device, const VkFramebufferCreateInf
         // Set the gvk::Framebuffer
         controlBlock.mFramebuffer = framebuffer;
 
+        // TODO : User configurable VkClearValue array
+        // TODO : Should 0 alpha be the default anyway?  Double check all existing use-cases
+
         // Prepare VkClearValue array
         std::vector<VkClearValue> clearValues;
         clearValues.reserve(controlBlock.mFramebuffer.get<ImageViews>().size());
@@ -139,7 +142,7 @@ VkResult RenderTarget::create(const Device& device, const VkFramebufferCreateInf
             auto clearValue = get_default<VkClearValue>();
             auto imageAspectFlags = get_image_aspect_flags(imageView.get<VkImageViewCreateInfo>().format);
             if (imageAspectFlags & VK_IMAGE_ASPECT_COLOR_BIT) {
-                clearValue.color.float32[3] = 1;
+                clearValue.color.float32[3] = 0;
             } else {
                 clearValue.depthStencil.depth = 1;
             }

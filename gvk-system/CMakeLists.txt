@@ -17,6 +17,7 @@ gvk_add_static_library(
         "${includeDirectory}"
     INCLUDE_FILES
         "${includePath}/button-set.hpp"
+        "${includePath}/display.hpp"
         "${includePath}/input.hpp"
         "${includePath}/keyboard.hpp"
         "${includePath}/mouse.hpp"
@@ -25,6 +26,7 @@ gvk_add_static_library(
         "${includePath}/updateable.hpp"
         "${includeDirectory}/gvk-system.hpp"
     SOURCE_FILES
+        "${sourcePath}/display.cpp"
         "${sourcePath}/surface.cpp"
 )
 

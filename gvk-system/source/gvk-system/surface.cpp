@@ -96,6 +96,12 @@ int32_t Surface::create(const CreateInfo* pCreateInfo, Surface* pSurface)
     // NOTE : Creating new Reference here because the Surface::ControlBlock lifetime
     //  manages GLFW initialization and termination.
     Reference<Surface::ControlBlock> reference(newref);
+
+    // GLFW_FLOATING
+    // GLFW_MOUSE_PASSTHROUGH
+    glfwWindowHint(GLFW_FLOATING, 1);
+    glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, 1);
+
     glfwWindowHint(GLFW_DECORATED, pCreateInfo->flags & Surface::CreateInfo::Decorated);
     glfwWindowHint(GLFW_RESIZABLE, pCreateInfo->flags & Surface::CreateInfo::Resizable);
     glfwWindowHint(GLFW_VISIBLE, pCreateInfo->flags & Surface::CreateInfo::Visible);
@@ -192,6 +198,18 @@ void Surface::set_window_extent(const std::array<int32_t, 2>& extent)
 {
     assert(mReference);
     glfwSetWindowSize((GLFWwindow*)mReference->mpWindowHandle, extent[0], extent[1]);
+}
+
+void Surface::maximize()
+{
+    assert(mReference);
+    glfwMaximizeWindow((GLFWwindow*)mReference->mpWindowHandle);
+}
+
+void Surface::minimize()
+{
+    assert(mReference);
+    glfwHideWindow((GLFWwindow*)mReference->mpWindowHandle);
 }
 
 Surface::ControlBlock::ControlBlock()
