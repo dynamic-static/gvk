@@ -45,11 +45,12 @@ gvk_add_static_library(
         "gvk-runtime/"
     LINK_LIBRARIES
         gvk-string
-        Vulkan::Vulkan
+        # Vulkan::Vulkan
         ${CMAKE_DL_LIBS}
     INCLUDE_DIRECTORIES
         "${generatedIncludeDirectory}"
         "${includeDirectory}"
+        "${Vulkan_INCLUDE_DIRECTORY}"
     INCLUDE_FILES
         "${generatedIncludeFiles}"
         "${includeDirectory}/gvk-defines.hpp"

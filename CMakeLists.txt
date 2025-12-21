@@ -10,6 +10,7 @@ include(gvk.build)
 
 ################################################################################
 # Vulkan SDK options
+add_compile_definitions(VK_NO_PROTOTYPES=1)
 set(gvk-Vulkan-SDK_VERSION 1.4.313.0 CACHE STRING "")
 
 set(gvk-Vulkan-SDK_URL_LINUX     "https://sdk.lunarg.com/sdk/download/${gvk-Vulkan-SDK_VERSION}/linux"   CACHE STRING "")
