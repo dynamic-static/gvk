@@ -94,7 +94,7 @@ public:
             Resizable        = 1 << 2,
             Visible          = 1 << 3,
             Transparent      = 1 << 4,
-            MousePassthrough = 1 << 5,
+            MousePassThrough = 1 << 5,
             Floating         = 1 << 6,
         };
 
