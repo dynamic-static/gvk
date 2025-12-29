@@ -89,11 +89,13 @@ public:
     {
         enum FlagBits
         {
-            Decorated   = 1,
-            Fullscreen  = 1 << 1,
-            Resizable   = 1 << 2,
-            Visible     = 1 << 3,
-            Transparent = 1 << 4,
+            Decorated        = 1,
+            Fullscreen       = 1 << 1,
+            Resizable        = 1 << 2,
+            Visible          = 1 << 3,
+            Transparent      = 1 << 4,
+            MousePassthrough = 1 << 5,
+            Floating         = 1 << 6,
         };
 
         uint32_t flags{ Decorated | Resizable | Visible };

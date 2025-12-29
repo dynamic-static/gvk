@@ -97,15 +97,12 @@ int32_t Surface::create(const CreateInfo* pCreateInfo, Surface* pSurface)
     //  manages GLFW initialization and termination.
     Reference<Surface::ControlBlock> reference(newref);
 
-    // GLFW_FLOATING
-    // GLFW_MOUSE_PASSTHROUGH
-    glfwWindowHint(GLFW_FLOATING, 1);
-    glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, 1);
-
     glfwWindowHint(GLFW_DECORATED, pCreateInfo->flags & Surface::CreateInfo::Decorated);
     glfwWindowHint(GLFW_RESIZABLE, pCreateInfo->flags & Surface::CreateInfo::Resizable);
     glfwWindowHint(GLFW_VISIBLE, pCreateInfo->flags & Surface::CreateInfo::Visible);
     glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, pCreateInfo->flags & Surface::CreateInfo::Transparent);
+    glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, pCreateInfo->flags & Surface::CreateInfo::MousePassThrough);
+    glfwWindowHint(GLFW_FLOATING, pCreateInfo->flags & Surface::CreateInfo::Floating);
     auto extent = pCreateInfo->extent;
     if (!extent[0] || !extent[1]) {
         extent = { 1280, 720 };
