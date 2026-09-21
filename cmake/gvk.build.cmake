@@ -383,7 +383,7 @@ function(gvk_install_artifacts)
     endif()
 
     # TODO : Documentation
-    configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION {CMAKE_BINARY_DIR}/cmake/)
+    configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION ${CMAKE_BINARY_DIR}/cmake/)
     if(gvkInternal)
         install(FILES "${config}" "${configVersion}" DESTINATION internal/cmake/${ARGS_TARGET}/)
     else()
@@ -434,7 +434,7 @@ function(gvk_install_layer)
     write_basic_package_version_file("${configVersion}" VERSION ${ARGS_VERSION} COMPATIBILITY ExactVersion)
     set(configTemplate "${gvkBuildModuleDirectory}/gvk-target.config.cmake.in")
     set(config "${CMAKE_BINARY_DIR}/cmake/${ARGS_TARGET}Config.cmake")
-    configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION {CMAKE_BINARY_DIR}/cmake/)
+    configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION ${CMAKE_BINARY_DIR}/cmake/)
 
     # TODO : Documentation
     if(gvkInternal)
@@ -466,7 +466,7 @@ function(gvk_install_pipeline_explorer_plugin)
     write_basic_package_version_file("${configVersion}" VERSION ${ARGS_VERSION} COMPATIBILITY ExactVersion)
     set(configTemplate "${gvkBuildModuleDirectory}/gvk-target.config.cmake.in")
     set(config "${CMAKE_BINARY_DIR}/cmake/${ARGS_TARGET}Config.cmake")
-    configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION {CMAKE_BINARY_DIR}/cmake/)
+    configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION ${CMAKE_BINARY_DIR}/cmake/)
 
     # TODO : Documentation
     if(gvkInternal)
@@ -498,7 +498,7 @@ function(gvk_install_metrics_provider)
     write_basic_package_version_file("${configVersion}" VERSION ${ARGS_VERSION} COMPATIBILITY ExactVersion)
     set(configTemplate "${gvkBuildModuleDirectory}/gvk-target.config.cmake.in")
     set(config "${CMAKE_BINARY_DIR}/cmake/${ARGS_TARGET}Config.cmake")
-    configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION {CMAKE_BINARY_DIR}/cmake/)
+    configure_package_config_file("${configTemplate}" "${config}" INSTALL_DESTINATION ${CMAKE_BINARY_DIR}/cmake/)
 
     # TODO : Documentation
     if(gvkInternal)
