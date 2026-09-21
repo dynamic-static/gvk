@@ -280,8 +280,8 @@ VkResult SurfaceKHR::create(const Instance& instance, const VkBaseInStructure* p
     } break;
     #endif // VK_USE_PLATFORM_ANDROID_KHR
     #ifdef VK_USE_PLATFORM_DIRECTFB_EXT
-    case get_stype<VkWin32SurfaceCreateInfoKHR>(): {
-        return SurfaceKHR::create(instance, (const VkWin32SurfaceCreateInfoKHR*)pCreateInfo, pAllocator, pSurface);
+    case get_stype<VkDirectFBSurfaceCreateInfoEXT>(): {
+        return SurfaceKHR::create(instance, (const VkDirectFBSurfaceCreateInfoEXT*)pCreateInfo, pAllocator, pSurface);
     } break;
     #endif // VK_USE_PLATFORM_DIRECTFB_EXT
     case get_stype<VkDisplaySurfaceCreateInfoKHR>(): {
