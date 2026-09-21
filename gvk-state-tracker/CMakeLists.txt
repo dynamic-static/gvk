@@ -129,6 +129,7 @@ gvk_add_layer(
         gvkDisableStateTracker
         gvkEnableStateTracker
 )
+add_dependencies(VK_LAYER_INTEL_gvk_state_tracker VK_LAYER_INTEL_gvk_state_tracker.generator.runner)
 if(MSVC)
     set_source_files_properties("${generatedSourcePath}/basic-state-tracker.cpp" PROPERTIES COMPILE_FLAGS "/bigobj")
     set_source_files_properties("${generatedSourcePath}/state-tracked-handles.cpp" PROPERTIES COMPILE_FLAGS "/bigobj")

@@ -121,6 +121,7 @@ gvk_add_static_library(
         "${sourcePath}/detail/to-string-manual.cpp"
         "${sourcePath}/defaults.cpp"
 )
+add_dependencies(gvk-structures gvk-structures.generator.runner)
 
 ################################################################################
 # gvk-structures.test

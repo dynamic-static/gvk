@@ -127,6 +127,17 @@ function(gvk_add_code_generator)
         COMMAND "${ARGS_TARGET}" "${ARGS_INPUT_FILES}"
         DEPENDS ${ARGS_TARGET} ${ARGS_INPUT_FILES}
     )
+
+    # NOTE : Register the generated files on a target that isn't part of ALL so
+    #   that they can be produced without building the libraries that consume them
+    #   (ie. `cmake --build . --target gvk-generate`).  This allows a host build to
+    #   generate files for a cross-compiled build.
+    add_custom_target(${ARGS_TARGET}.runner DEPENDS ${ARGS_OUTPUT_FILES})
+    set_target_properties(${ARGS_TARGET}.runner PROPERTIES FOLDER "${GVK_IDE_FOLDER}/${ARGS_FOLDER}")
+    if(NOT TARGET gvk-generate)
+        add_custom_target(gvk-generate)
+    endif()
+    add_dependencies(gvk-generate ${ARGS_TARGET}.runner)
 endfunction()
 
 function(gvk_add_layer)

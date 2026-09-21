@@ -69,3 +69,4 @@ gvk_add_static_library(
         "${sourcePath}/backend/tool.cpp"
         "${sourcePath}/backend/utilities.cpp"
 )
+add_dependencies(gvk-pipeline-explorer-backend gvk-pipeline-explorer.generator.runner)

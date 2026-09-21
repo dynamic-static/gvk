@@ -72,6 +72,7 @@ gvk_add_static_library(
         "${sourceDirectory}/gvk-environment.cpp"
         "${sourceDirectory}/gvk-runtime.cpp"
 )
+add_dependencies(gvk-runtime gvk-runtime.generator.runner)
 
 ################################################################################
 # gvk-runtime.test

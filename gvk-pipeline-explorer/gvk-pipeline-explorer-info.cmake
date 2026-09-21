@@ -23,6 +23,7 @@ gvk_add_static_library(
         "${sourcePath}/detail/to-string-manual.cpp"
         "${sourcePath}/detail/to-string-manual.cpp"
 )
+add_dependencies(gvk-pipeline-explorer-info gvk-pipeline-explorer.generator.runner)
 if(MSVC)
     set_source_files_properties("${generatedSourcePath}/pipeline-explorer-structure-deserialization.cpp" PROPERTIES COMPILE_FLAGS "/bigobj")
 endif()

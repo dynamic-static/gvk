@@ -74,6 +74,7 @@ gvk_add_static_library(
         "${sourcePath}/registry.cpp"
         "${sourcePath}/unique-handles-manager.cpp"
 )
+add_dependencies(gvk-layer gvk-layer.generator.runner)
 if(MSVC)
     set_source_files_properties("${generatedSourcePath}/unique-handles-layer-hooks.cpp" PROPERTIES COMPILE_FLAGS "/bigobj")
     set_source_files_properties("${generatedSourcePath}/layer-hooks.cpp" PROPERTIES COMPILE_FLAGS "/bigobj")

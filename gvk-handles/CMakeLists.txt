@@ -79,6 +79,7 @@ gvk_add_static_library(
         "${sourcePath}/utilities.cpp"
         "${sourcePath}/wsi-context.cpp"
 )
+add_dependencies(gvk-handles gvk-handles.generator.runner)
 
 ################################################################################
 # gvk-handles.test

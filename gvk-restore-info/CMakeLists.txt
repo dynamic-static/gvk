@@ -71,6 +71,7 @@ gvk_add_static_library(
         "${generatedSourceFiles}"
         "${sourcePath}/detail/to-string-manual.cpp"
 )
+add_dependencies(gvk-restore-info gvk-restore-info.generator.runner)
 
 ################################################################################
 # gvk-restore-info install

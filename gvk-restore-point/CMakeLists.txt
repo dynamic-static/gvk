@@ -119,6 +119,7 @@ gvk_add_layer(
         gvkGetRestorePointManifest
         gvkDestroyRestorePoint
 )
+add_dependencies(VK_LAYER_INTEL_gvk_restore_point VK_LAYER_INTEL_gvk_restore_point.generator.runner)
 if(MSVC)
     set_source_files_properties("${generatedSourcePath}/update-structure-handles.cpp" PROPERTIES COMPILE_FLAGS "/bigobj")
 endif()

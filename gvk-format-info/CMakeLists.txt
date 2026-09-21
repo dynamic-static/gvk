@@ -76,6 +76,7 @@ gvk_add_static_library(
         "${generatedSourceFiles}"
         "${sourceDirectory}/gvk-format-info.cpp"
 )
+add_dependencies(gvk-format-info gvk-format-info.generator.runner)
 
 ################################################################################
 # gvk-format-info.test

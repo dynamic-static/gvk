@@ -82,6 +82,7 @@ gvk_add_static_library(
         "${sourcePath}/detail/copy-manual.cpp"
         "${sourcePath}/detail/to-string-manual.cpp"
 )
+add_dependencies(gvk-binding-info gvk-binding-info.generator.runner)
 
 ################################################################################
 # gvk-binding-info install
