@@ -48,8 +48,17 @@ macro(gvk_declare_external_module external-module enabled)
     list(APPEND external-modules ${external-module})
 endmacro()
 
+# NOTE : These are only used by code generators, which run on the host.  When generators
+#   come from the host they aren't needed (or wanted) in this build.
+set(gvk-host-only-modules gvk-cppgen gvk-xml)
+set(gvk-host-only-external-modules tinyxml2)
+
 function(gvk_enable_external_module external-module)
-    set(${external-module}_ENABLED           ON                               CACHE BOOL "")
+    if(gvk-GENERATORS_FROM_HOST AND "${external-module}" IN_LIST gvk-host-only-external-modules)
+        set(${external-module}_ENABLED OFF CACHE BOOL "" FORCE)
+        return()
+    endif()
+    set(${external-module}_ENABLED           ON                               CACHE BOOL "" FORCE)
     set(${external-module}_INSTALL_ARTIFACTS ${gvk-default_INSTALL_ARTIFACTS} CACHE BOOL "")
     set(${external-module}_INSTALL_HEADERS   ${gvk-default_INSTALL_HEADERS}   CACHE BOOL "")
     include(external/${external-module})
@@ -87,12 +96,21 @@ macro(gvk_decalre_module gvk-module enabled)
 endmacro()
 
 function(gvk_enable_module gvk-module)
-    set(${gvk-module}_ENABLED           ON                               CACHE BOOL   "")
+    if(gvk-GENERATORS_FROM_HOST AND "${gvk-module}" IN_LIST gvk-host-only-modules)
+        set(${gvk-module}_ENABLED OFF CACHE BOOL "" FORCE)
+        return()
+    endif()
+    set(${gvk-module}_ENABLED           ON                               CACHE BOOL   "" FORCE)
     set(${gvk-module}_INSTALL_ARTIFACTS ${gvk-default_INSTALL_ARTIFACTS} CACHE BOOL   "")
     set(${gvk-module}_INSTALL_HEADERS   ${gvk-default_INSTALL_HEADERS}   CACHE BOOL   "")
     set(${gvk-module}_SOURCE_DIRECTORY  ${gvk-module}                    CACHE STRING "")
-    if(EXISTS "${${gvk-module}_SOURCE_DIRECTORY}/dependencies.cmake")
-        include("${${gvk-module}_SOURCE_DIRECTORY}/dependencies.cmake")
+    # NOTE : EXISTS (and include()) is only well-defined for absolute paths, a bare
+    #   relative path is resolved against the calling process's working directory, not
+    #   CMAKE_CURRENT_SOURCE_DIR.  This matters here because gvk_enable_module always runs
+    #   from the project root, but the working directory isn't guaranteed to match it, for
+    #   example ExternalProject_Add always configures with the binary directory current.
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${${gvk-module}_SOURCE_DIRECTORY}/dependencies.cmake")
+        include("${CMAKE_CURRENT_SOURCE_DIR}/${${gvk-module}_SOURCE_DIRECTORY}/dependencies.cmake")
     endif()
 endfunction()
 
@@ -132,6 +150,8 @@ foreach(gvk-module IN LISTS gvk-modules)
         add_subdirectory(${${gvk-module}_SOURCE_DIRECTORY})
     endif()
 endforeach()
+
+gvk_add_generators_from_host()
 
 ################################################################################
 # GVK samples and tests options

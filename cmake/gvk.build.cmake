@@ -15,6 +15,33 @@ endif()
 
 set(gvkBuildModuleDirectory "${CMAKE_CURRENT_LIST_DIR}")
 
+################################################################################
+# Generators from host
+# NOTE : Code generators are executables that run at build time, when cross-compiling
+#   they can't run on the build machine.  With gvk-GENERATORS_FROM_HOST enabled, a nested
+#   host build of gvk (see gvk_add_generators_from_host()) generates the files and this
+#   build consumes them.  It defaults to ON when cross-compiling, and can be enabled for
+#   native builds to exercise the mechanism.
+option(gvk-GENERATORS_FROM_HOST "Generate code with a nested host build of gvk" ${CMAKE_CROSSCOMPILING})
+set(gvk-HOST_BINARY_DIR "${PROJECT_BINARY_DIR}/gvk-host" CACHE PATH "Binary directory for the nested host build of gvk")
+if(CMAKE_HOST_WIN32)
+    set(gvk-HOST_GENERATOR "Visual Studio 17 2022" CACHE STRING "CMake generator for the nested host build of gvk")
+else()
+    set(gvk-HOST_GENERATOR "" CACHE STRING "CMake generator for the nested host build of gvk (default is the current generator)")
+endif()
+
+# NOTE : Generator output is written under the binary directory of the module that owns
+#   it.  When generators come from the host it's written to the same relative location in
+#   the nested host build's binary directory instead.
+function(gvk_get_generator_output_directory outDirectory)
+    if(gvk-GENERATORS_FROM_HOST)
+        file(RELATIVE_PATH relativeDirectory "${PROJECT_BINARY_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+        set(${outDirectory} "${gvk-HOST_BINARY_DIR}/${relativeDirectory}" PARENT_SCOPE)
+    else()
+        set(${outDirectory} "${CMAKE_CURRENT_BINARY_DIR}" PARENT_SCOPE)
+    endif()
+endfunction()
+
 function(gvk_create_file_group files)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
     foreach(file ${files})
@@ -113,6 +140,32 @@ endfunction()
 
 function(gvk_add_code_generator)
     cmake_parse_arguments(ARGS "" "TARGET;FOLDER" "LINK_LIBRARIES;INCLUDE_DIRECTORIES;INCLUDE_FILES;SOURCE_FILES;INPUT_FILES;OUTPUT_FILES;COMPILE_DEFINITIONS" ${ARGN})
+    if(gvk-GENERATORS_FROM_HOST)
+        # NOTE : The generated files are produced by the nested host build, this build
+        #   only needs to know about them and to wait for the host build to finish.
+        foreach(outputFile ${ARGS_OUTPUT_FILES})
+            string(FIND "${outputFile}" "${gvk-HOST_BINARY_DIR}/" outputFileIndex)
+            if(NOT outputFileIndex EQUAL 0)
+                message(FATAL_ERROR "${ARGS_TARGET} : '${outputFile}' is not under '${gvk-HOST_BINARY_DIR}/', use gvk_get_generator_output_directory() to set generated paths")
+            endif()
+        endforeach()
+        set_property(GLOBAL APPEND PROPERTY gvk-host-generated-files ${ARGS_OUTPUT_FILES})
+        set_source_files_properties(${ARGS_OUTPUT_FILES} PROPERTIES GENERATED TRUE)
+        add_custom_target(${ARGS_TARGET}.runner)
+        set_target_properties(${ARGS_TARGET}.runner PROPERTIES FOLDER "${GVK_IDE_FOLDER}/${ARGS_FOLDER}")
+        set_property(GLOBAL APPEND PROPERTY gvk-host-runner-targets ${ARGS_TARGET}.runner)
+        # NOTE : ARGS_TARGET is "<module>.generator" for every module this has been applied
+        #   to so far, use it to find out which modules the nested host build needs to
+        #   enable.  This doesn't hold for every gvk-*.generator target (eg. the ones for
+        #   gvk-restore-point and gvk-state-tracker are named after the layer they build,
+        #   VK_LAYER_INTEL_gvk_*), so this will need revisiting for those if/when they're
+        #   converted (see TODO.md).  If the derived name is wrong, the FATAL_ERROR check
+        #   above will still catch it (that module's generator wouldn't have been enabled
+        #   in the nested build, so its output wouldn't land under gvk-HOST_BINARY_DIR).
+        string(REGEX REPLACE "\\.generator$" "" requiredModule "${ARGS_TARGET}")
+        set_property(GLOBAL APPEND PROPERTY gvk-host-required-modules ${requiredModule})
+        return()
+    endif()
     gvk_add_executable(
         TARGET               ${ARGS_TARGET}
         FOLDER              "${ARGS_FOLDER}"
@@ -138,6 +191,54 @@ function(gvk_add_code_generator)
         add_custom_target(gvk-generate)
     endif()
     add_dependencies(gvk-generate ${ARGS_TARGET}.runner)
+endfunction()
+
+# NOTE : Call after all modules have been added.  Configures gvk for the host with only
+#   the modules needed to build the code generators, and builds `gvk-generate`.  The
+#   nested build is incremental, BUILD_ALWAYS defers to it to decide what's out of date so
+#   changes to a generator (or anything it depends on) cause regeneration.  The nested
+#   build uses the same configuration as this build (Release if there isn't one).
+function(gvk_add_generators_from_host)
+    if(NOT gvk-GENERATORS_FROM_HOST)
+        return()
+    endif()
+    include(ExternalProject)
+    get_property(generatedFiles GLOBAL PROPERTY gvk-host-generated-files)
+    get_property(runnerTargets GLOBAL PROPERTY gvk-host-runner-targets)
+    get_property(requiredModules GLOBAL PROPERTY gvk-host-required-modules)
+    list(REMOVE_DUPLICATES requiredModules)
+    set(requiredModuleArgs)
+    foreach(requiredModule ${requiredModules})
+        list(APPEND requiredModuleArgs "-D${requiredModule}_ENABLED=ON")
+    endforeach()
+    set(hostConfig "$<IF:$<BOOL:$<CONFIG>>,$<CONFIG>,Release>")
+    set(hostGenerator)
+    if(gvk-HOST_GENERATOR)
+        set(hostGenerator CMAKE_GENERATOR "${gvk-HOST_GENERATOR}")
+    endif()
+    ExternalProject_Add(
+        gvk-host-generate
+        SOURCE_DIR "${PROJECT_SOURCE_DIR}"
+        BINARY_DIR "${gvk-HOST_BINARY_DIR}"
+        ${hostGenerator}
+        CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=${hostConfig}
+            -Dgvk-default_ENABLED=OFF
+            ${requiredModuleArgs}
+            -Dgvk-build-samples=OFF
+            -Dgvk-build-tests=OFF
+            -Dgvk-GENERATORS_FROM_HOST=OFF
+        BUILD_COMMAND "${CMAKE_COMMAND}" --build "${gvk-HOST_BINARY_DIR}" --config ${hostConfig} --target gvk-generate
+        BUILD_BYPRODUCTS ${generatedFiles}
+        BUILD_ALWAYS TRUE
+        INSTALL_COMMAND ""
+        USES_TERMINAL_CONFIGURE TRUE
+        USES_TERMINAL_BUILD TRUE
+    )
+    set_target_properties(gvk-host-generate PROPERTIES FOLDER "${GVK_IDE_FOLDER}/")
+    foreach(runnerTarget ${runnerTargets})
+        add_dependencies(${runnerTarget} gvk-host-generate)
+    endforeach()
 endfunction()
 
 function(gvk_add_layer)

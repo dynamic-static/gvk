@@ -1,9 +1,10 @@
 
 ################################################################################
 # gvk-runtime.generator
-set(generatedIncludeDirectory "${CMAKE_CURRENT_BINARY_DIR}/include/")
+gvk_get_generator_output_directory(generatedOutputDirectory)
+set(generatedIncludeDirectory "${generatedOutputDirectory}/include/")
 set(generatedIncludePath "${generatedIncludeDirectory}/gvk-runtime/generated/")
-set(generatedSourcePath "${CMAKE_CURRENT_BINARY_DIR}/source/gvk-runtime/generated/")
+set(generatedSourcePath "${generatedOutputDirectory}/source/gvk-runtime/generated/")
 set(generatedIncludeFiles
     "${generatedIncludePath}/dispatch-table.hpp"
 )

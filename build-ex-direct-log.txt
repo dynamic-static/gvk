@@ -1,0 +1,14 @@
+﻿-- Selecting Windows SDK version 10.0.22621.0 to target Windows 10.0.26200.
+-- DEBUG after FORCE, gvk-handles_ENABLED=ON
+-- DEBUG DUMP gvk-cppgen_ENABLED=OFF
+-- DEBUG DUMP gvk-xml_ENABLED=OFF
+-- DEBUG DUMP gvk-string_ENABLED=OFF
+-- DEBUG DUMP gvk-format-info_ENABLED=OFF
+-- DEBUG DUMP gvk-runtime_ENABLED=OFF
+-- DEBUG DUMP gvk-reference_ENABLED=OFF
+-- DEBUG DUMP gvk-structures_ENABLED=OFF
+-- DEBUG DUMP gvk-handles_ENABLED=ON
+-- DEBUG DUMP tinyxml2_ENABLED=OFF
+-- Configuring done (0.3s)
+-- Generating done (0.3s)
+-- Build files have been written to: E:/dynamic-static/gvk/build-ex-direct

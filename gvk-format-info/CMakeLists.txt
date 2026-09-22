@@ -1,9 +1,10 @@
 
 ################################################################################
 # gvk-format-info.generator
-set(generatedIncludeDirectory "${CMAKE_CURRENT_BINARY_DIR}/include/")
+gvk_get_generator_output_directory(generatedOutputDirectory)
+set(generatedIncludeDirectory "${generatedOutputDirectory}/include/")
 set(generatedIncludePath "${generatedIncludeDirectory}/gvk-format-info/generated/")
-set(generatedSourcePath "${CMAKE_CURRENT_BINARY_DIR}/source/gvk-format-info/generated/")
+set(generatedSourcePath "${generatedOutputDirectory}/source/gvk-format-info/generated/")
 set(generatedIncludeFiles
     "${generatedIncludePath}/enumerate-formats.hpp"
     "${generatedIncludePath}/format-info-enumerations-to-string.hpp"

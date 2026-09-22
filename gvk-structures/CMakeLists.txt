@@ -1,9 +1,10 @@
 
 ################################################################################
 # gvk-structures.generator
-set(generatedIncludeDirectory "${CMAKE_CURRENT_BINARY_DIR}/include/")
+gvk_get_generator_output_directory(generatedOutputDirectory)
+set(generatedIncludeDirectory "${generatedOutputDirectory}/include/")
 set(generatedIncludePath "${generatedIncludeDirectory}/gvk-structures/generated/")
-set(generatedSourcePath "${CMAKE_CURRENT_BINARY_DIR}/source/gvk-structures/generated/")
+set(generatedSourcePath "${generatedOutputDirectory}/source/gvk-structures/generated/")
 set(generatedIncludeFiles
     "${generatedIncludePath}/cerealize-pnext.hpp"
     "${generatedIncludePath}/core-enumerations-to-string.hpp"
