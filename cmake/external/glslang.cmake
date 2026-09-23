@@ -42,4 +42,20 @@ gvk_setup_glslang_target(glslang-default-resource-limits)
 gvk_setup_glslang_target(MachineIndependent)
 gvk_setup_glslang_target(OSDependent)
 gvk_setup_glslang_target(SPIRV)
+# NOTE : KNOWN ISSUE - `PARENT_SCOPE` only escapes one function call level.  When glslang
+#   is enabled directly (eg. `-Dgvk-default_ENABLED=OFF -Dgvk-spirv_ENABLED=ON`, as when
+#   selectively cross-compiling for Android), the enable chain is one function call deeper
+#   than the default all-modules-on path (gvk_enable_module -> dependencies.cmake ->
+#   gvk_enable_external_module -> this file), so `glslangLibraries` gets lost one level
+#   before reaching the top-level/global scope that gvk-spirv/CMakeLists.txt reads it
+#   from.  Confirmed 100% reproducible: a FRESH configure that selectively enables
+#   gvk-spirv fails (`gvk-spirv`'s link line is missing every glslang library, causing
+#   `glslang/Public/ResourceLimits.h` not found), but simply reconfiguring the SAME tree
+#   again (no new flags needed) fixes it, every time.  The reason a bare reconfigure fixes
+#   it isn't fully understood (normal variables shouldn't persist across separate cmake
+#   process invocations; likely interacts with FetchContent's first-populate code path).
+#   Workaround for now: configure twice.  MUST be fixed properly (eg. replace this
+#   PARENT_SCOPE with a GLOBAL PROPERTY, the same technique used for
+#   gvk-host-required-modules in gvk.build.cmake) before merging android-support to trunk.
+#   See kaiju session-notes/2026_09_23_01_gvk-spirv-cross-compile.md for the full writeup.
 set(glslangLibraries ${glslangLibraries} PARENT_SCOPE)

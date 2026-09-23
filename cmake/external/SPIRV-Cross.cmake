@@ -32,6 +32,8 @@ gvk_setup_spirv_cross_target(spirv-cross-hlsl)
 gvk_setup_spirv_cross_target(spirv-cross-msl)
 gvk_setup_spirv_cross_target(spirv-cross-reflect)
 gvk_setup_spirv_cross_target(spirv-cross-util)
+# NOTE : KNOWN ISSUE - same `PARENT_SCOPE` scope-depth issue as `glslangLibraries` in
+#   glslang.cmake, see the NOTE there for the full explanation, reproduction, and status.
 set(spirvCrossLibraries ${spirvCrossLibraries} PARENT_SCOPE)
 
 if(SPIRV-Cross_INSTALL_HEADERS)
