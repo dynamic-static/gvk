@@ -31,7 +31,31 @@ NOTE : gvk_dl<open/sym/close> may be overriden to use a different system call (L
 NOTE : Best practices for loading dll/so libraries (ie. full paths instead of relative paths) should be exercised
 */
 
-#ifdef __linux__
+// NOTE : Checked before __linux__ because Android's NDK Clang target also defines
+//   __linux__ (Android's kernel is Linux), so __linux__ alone can't distinguish desktop
+//   Linux (Xlib/X11) from Android (no X11, dlopen()/dlsym()/dlclose() still apply though).
+#ifdef __ANDROID__
+
+#ifndef GVK_PLATFORM_ANDROID
+#define GVK_PLATFORM_ANDROID
+#endif
+#ifndef VK_USE_PLATFORM_ANDROID_KHR
+#define VK_USE_PLATFORM_ANDROID_KHR
+#endif
+
+#include <dlfcn.h>
+
+#ifndef gvk_dlopen
+#define gvk_dlopen(LIBRARY_NAME) (void*)dlopen(LIBRARY_NAME, RTLD_NOW | RTLD_LOCAL)
+#endif
+#ifndef gvk_dlsym
+#define gvk_dlsym(LIBRARY_HANDLE, SYMBOL_NAME) (void*)dlsym(LIBRARY_HANDLE, SYMBOL_NAME)
+#endif
+#ifndef gvk_dlclose
+#define gvk_dlclose(LIBRARY_HANDLE) dlclose(LIBRARY_HANDLE)
+#endif
+
+#elif defined(__linux__)
 
 #ifndef GVK_PLATFORM_LINUX
 #define GVK_PLATFORM_LINUX
@@ -64,7 +88,7 @@ NOTE : Best practices for loading dll/so libraries (ie. full paths instead of re
 #define gvk_dlclose(LIBRARY_HANDLE) dlclose(LIBRARY_HANDLE)
 #endif
 
-#endif // __linux__
+#endif // __ANDROID__ / __linux__
 
 #if defined(_WIN32) || defined(_WIN64)
 

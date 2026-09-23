@@ -59,6 +59,44 @@ inline void load(ArchiveType& archive, VkXlibSurfaceCreateInfoKHR& obj)
 #endif // VK_USE_PLATFORM_XLIB_KHR
 
 ////////////////////////////////////////////////////////////////////////////////
+// Android
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+template <typename ArchiveType>
+inline void save(ArchiveType& archive, const VkAndroidSurfaceCreateInfoKHR& obj)
+{
+    archive(obj.sType);
+    gvk::detail::cerealize_pnext(archive, obj.pNext);
+    archive(obj.flags);
+    gvk::detail::cerealize_handle(archive, obj.window);
+}
+
+template <typename ArchiveType>
+inline void load(ArchiveType& archive, VkAndroidSurfaceCreateInfoKHR& obj)
+{
+    archive(obj.sType);
+    obj.pNext = gvk::detail::decerealize_pnext(archive);
+    archive(obj.flags);
+    obj.window = gvk::detail::decerealize_handle<ANativeWindow*>(archive);
+}
+
+template <typename ArchiveType>
+inline void save(ArchiveType& archive, const VkImportAndroidHardwareBufferInfoANDROID& obj)
+{
+    archive(obj.sType);
+    gvk::detail::cerealize_pnext(archive, obj.pNext);
+    gvk::detail::cerealize_handle(archive, obj.buffer);
+}
+
+template <typename ArchiveType>
+inline void load(ArchiveType& archive, VkImportAndroidHardwareBufferInfoANDROID& obj)
+{
+    archive(obj.sType);
+    obj.pNext = gvk::detail::decerealize_pnext(archive);
+    obj.buffer = gvk::detail::decerealize_handle<AHardwareBuffer*>(archive);
+}
+#endif // VK_USE_PLATFORM_ANDROID_KHR
+
+////////////////////////////////////////////////////////////////////////////////
 // Win32
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 template <typename ArchiveType>

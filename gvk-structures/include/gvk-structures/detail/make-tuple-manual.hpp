@@ -49,6 +49,29 @@ inline auto make_tuple(const VkXlibSurfaceCreateInfoKHR& obj)
 #endif // VK_USE_PLATFORM_XLIB_KHR
 
 ////////////////////////////////////////////////////////////////////////////////
+// Android
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+inline auto make_tuple(const VkAndroidSurfaceCreateInfoKHR& obj)
+{
+    return std::make_tuple(
+        obj.sType,
+        detail::PNextTupleElementWrapper { obj.pNext },
+        obj.flags,
+        obj.window
+    );
+}
+
+inline auto make_tuple(const VkImportAndroidHardwareBufferInfoANDROID& obj)
+{
+    return std::make_tuple(
+        obj.sType,
+        detail::PNextTupleElementWrapper { obj.pNext },
+        obj.buffer
+    );
+}
+#endif // VK_USE_PLATFORM_ANDROID_KHR
+
+////////////////////////////////////////////////////////////////////////////////
 // Win32
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 inline auto make_tuple(const VkExportFenceWin32HandleInfoKHR& obj)

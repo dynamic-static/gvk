@@ -77,6 +77,10 @@ int main(int, const char*[])
         // Linux
         apiElements.manuallyImplemented.insert("VkXlibSurfaceCreateInfoKHR");
 
+        // Android
+        apiElements.manuallyImplemented.insert("VkAndroidSurfaceCreateInfoKHR");
+        apiElements.manuallyImplemented.insert("VkImportAndroidHardwareBufferInfoANDROID");
+
         // Win32
         apiElements.manuallyImplemented.insert("VkExportFenceWin32HandleInfoKHR");
         apiElements.manuallyImplemented.insert("VkExportMemoryWin32HandleInfoKHR");
