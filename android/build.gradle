@@ -1,0 +1,6 @@
+// NOTE : Root build script.  Declares plugin versions once for every sample module to use
+//   (`apply false` here just makes the plugin available, without applying it to this
+//   project); each sample module applies what it needs in its own build.gradle.
+plugins {
+    id 'com.android.application' version '9.4.0' apply false
+}

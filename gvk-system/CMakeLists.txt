@@ -25,6 +25,10 @@ gvk_add_static_library(
         "${includePath}/updateable.hpp"
         "${includeDirectory}/gvk-system.hpp"
     SOURCE_FILES
+        "${sourcePath}/android-game-activity-surface.cpp"
+        "${sourcePath}/android-game-activity-surface.hpp"
+        "${sourcePath}/glfw-surface.cpp"
+        "${sourcePath}/glfw-surface.hpp"
         "${sourcePath}/surface.cpp"
 )
 
