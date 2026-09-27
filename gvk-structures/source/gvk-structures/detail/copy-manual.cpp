@@ -48,6 +48,34 @@ template <> void destroy_structure_copy<VkXlibSurfaceCreateInfoKHR>(const VkXlib
 #endif // VK_USE_PLATFORM_XLIB_KHR
 
 ////////////////////////////////////////////////////////////////////////////////
+// Android
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+template <> VkAndroidSurfaceCreateInfoKHR create_structure_copy<VkAndroidSurfaceCreateInfoKHR>(const VkAndroidSurfaceCreateInfoKHR& obj, const VkAllocationCallbacks* pAllocator)
+{
+    auto result = obj;
+    result.pNext = (const void*)create_pnext_copy(obj.pNext, pAllocator);
+    return result;
+}
+
+template <> void destroy_structure_copy<VkAndroidSurfaceCreateInfoKHR>(const VkAndroidSurfaceCreateInfoKHR& obj, const VkAllocationCallbacks* pAllocator)
+{
+    destroy_pnext_copy(obj.pNext, pAllocator);
+}
+
+template <> VkImportAndroidHardwareBufferInfoANDROID create_structure_copy<VkImportAndroidHardwareBufferInfoANDROID>(const VkImportAndroidHardwareBufferInfoANDROID& obj, const VkAllocationCallbacks* pAllocator)
+{
+    auto result = obj;
+    result.pNext = (const void*)create_pnext_copy(obj.pNext, pAllocator);
+    return result;
+}
+
+template <> void destroy_structure_copy<VkImportAndroidHardwareBufferInfoANDROID>(const VkImportAndroidHardwareBufferInfoANDROID& obj, const VkAllocationCallbacks* pAllocator)
+{
+    destroy_pnext_copy(obj.pNext, pAllocator);
+}
+#endif // VK_USE_PLATFORM_ANDROID_KHR
+
+////////////////////////////////////////////////////////////////////////////////
 // Win32
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 GVK_STUB_STRUCTURE_COPY_FUNCTIONS(SECURITY_ATTRIBUTES)

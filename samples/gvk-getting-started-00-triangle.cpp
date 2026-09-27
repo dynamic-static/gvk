@@ -26,7 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gvk-sample-utilities.hpp"
 
-int main(int, const char*[])
+int gvk_main(int, const char*[])
 {
     // We'll start by opening a gvk_result_scope...this will declare a VkResult in
     //  the current scope named 'gvkResult' initialized with the specified VkResult

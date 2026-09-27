@@ -58,6 +58,12 @@ VkResult load_vulkan_runtime()
         sVulkanRuntime = gvk_dlopen("vulkan-1.dll");
     }
 #endif
+#ifdef GVK_PLATFORM_ANDROID
+    // NOTE : Android's Vulkan loader is always unversioned, unlike desktop Linux.
+    if (!sVulkanRuntime) {
+        sVulkanRuntime = gvk_dlopen("libvulkan.so");
+    }
+#endif
     return sVulkanRuntime ? VK_SUCCESS : VK_ERROR_FEATURE_NOT_PRESENT;
 }
 

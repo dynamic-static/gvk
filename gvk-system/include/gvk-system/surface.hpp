@@ -29,7 +29,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gvk-system/input.hpp"
 #include "gvk-reference.hpp"
 
-#ifdef __linux__
+// NOTE : __ANDROID__ also defines __linux__; exclude it here the same way
+//  gvk-defines.hpp does, since Android has no X11.
+#if defined(__linux__) && !defined(__ANDROID__)
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 #ifdef Bool
@@ -51,6 +53,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define NOMINMAX
 #endif
 #include <Windows.h>
+#endif
+
+#ifdef __ANDROID__
+#include <android/native_window.h>
 #endif
 
 #include <array>
@@ -114,12 +120,19 @@ public:
 
     struct PlatformInfo
     {
-#if defined(__linux__)
+#if defined(__linux__) && !defined(__ANDROID__)
         Display* x11Display{ nullptr };
         Window x11Window{ };
 #endif
 #if defined(_WIN32) || defined(_WIN64)
         HWND hwnd{ NULL };
+#endif
+#ifdef __ANDROID__
+        // NOTE : May be null; GameActivity's ANativeWindow is asynchronous and reversible
+        //  (destroyed while backgrounded, recreated on resume).  Callers that build a
+        //  VkAndroidSurfaceCreateInfoKHR from this should expect null and handle it the
+        //  same way gvk::wsi::Context's pfnRecreateSurface does.
+        ANativeWindow* androidWindow{ nullptr };
 #endif
     };
 

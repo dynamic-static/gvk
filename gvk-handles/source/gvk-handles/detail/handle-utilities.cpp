@@ -423,6 +423,20 @@ VkResult initialize_control_block<Device>(Device& device)
         if (deviceControlBlock.mDispatchTable.gvkGetBufferDeviceAddressKHR) {
             deviceControlBlock.mDispatchTable.gvkGetBufferDeviceAddressEXT = deviceControlBlock.mDispatchTable.gvkGetBufferDeviceAddressKHR;
         }
+
+        // NOTE : vkCreateRenderPass2() was promoted to core in Vulkan 1.2 from
+        //  VK_KHR_create_renderpass2.  On a device that only supports 1.1 (even with the
+        //  extension enabled), vkGetDeviceProcAddr() only guarantees the KHR-suffixed name
+        //  resolves, not the promoted core one -- found for real on Android, gvk::wsi::Context
+        //  crashing with gvkCreateRenderPass2 null on a Vulkan 1.1 device.  Unlike
+        //  GetBufferDeviceAddress above, chaining has to go both ways here: nothing so far
+        //  has exercised a device where only the KHR name resolves.
+        if (deviceControlBlock.mDispatchTable.gvkCreateRenderPass2) {
+            deviceControlBlock.mDispatchTable.gvkCreateRenderPass2KHR = deviceControlBlock.mDispatchTable.gvkCreateRenderPass2;
+        }
+        if (deviceControlBlock.mDispatchTable.gvkCreateRenderPass2KHR) {
+            deviceControlBlock.mDispatchTable.gvkCreateRenderPass2 = deviceControlBlock.mDispatchTable.gvkCreateRenderPass2KHR;
+        }
 #endif
 
         const auto& deviceCreateInfo = *deviceControlBlock.mDeviceCreateInfo;

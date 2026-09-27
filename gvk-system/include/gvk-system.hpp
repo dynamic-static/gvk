@@ -27,6 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "gvk-system/button-set.hpp"
+#include "gvk-system/entry-point.hpp"
 #include "gvk-system/input.hpp"
 #include "gvk-system/keyboard.hpp"
 #include "gvk-system/mouse.hpp"

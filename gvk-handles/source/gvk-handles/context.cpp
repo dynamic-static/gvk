@@ -65,6 +65,9 @@ VkResult Context::create(const CreateInfo* pCreateInfo, const VkAllocationCallba
             #ifdef VK_USE_PLATFORM_WIN32_KHR
             instanceExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
             #endif
+            #ifdef VK_USE_PLATFORM_ANDROID_KHR
+            instanceExtensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+            #endif
         }
         instanceCreateInfo.enabledLayerCount = (uint32_t)layers.size();
         instanceCreateInfo.ppEnabledLayerNames = !layers.empty() ? layers.data() : nullptr;
@@ -88,6 +91,13 @@ VkResult Context::create(const CreateInfo* pCreateInfo, const VkAllocationCallba
         std::vector<const char*> deviceExtensions(deviceCreateInfo.ppEnabledExtensionNames, deviceCreateInfo.ppEnabledExtensionNames + deviceCreateInfo.enabledExtensionCount);
         if (pCreateInfo->loadWsiExtensions) {
             deviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+            // NOTE : gvk::wsi::Context builds render passes with VkRenderPassCreateInfo2,
+            //  core only in Vulkan 1.2+; on a 1.1 implementation (eg. this tablet) it's
+            //  only reachable via this extension.  Harmless to request even where it's
+            //  already core (a promoted extension's name must still be supported/enabled
+            //  per spec).  Found for real running this sample on Android -- see
+            //  kaiju session-notes' Vulkan 1.1/VkRenderPassCreateInfo2 open question.
+            deviceExtensions.push_back(VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME);
         }
         deviceCreateInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
         deviceCreateInfo.ppEnabledExtensionNames = !deviceExtensions.empty() ? deviceExtensions.data() : nullptr;

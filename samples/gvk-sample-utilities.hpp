@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gvk-sample-png.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 
 // GvkSampleContext extends gvk::Context.  gvk::Context handles initialization
@@ -109,8 +110,27 @@ public:
             // VkDebugUtilsMessengerCreateInfoEXT is an optional member of gvk::Context::CreateInfo.
             //  Providing a VkDebugUtilsMessengerCreateInfoEXT indicates that the debug
             //  utils extension should be loaded.
+            // NOTE : Not every Vulkan implementation supports VK_EXT_debug_utils (eg. this
+            //  driver only supports the older VK_EXT_debug_report) -- requesting an
+            //  unsupported extension fails vkCreateInstance() with
+            //  VK_ERROR_EXTENSION_NOT_PRESENT, found for real running this sample on
+            //  Android.  Check first, same spirit as the loadApiDumpLayer/
+            //  loadValidationLayer TODOs below.
             auto debugUtilsMessengerCreateInfo = gvk::get_default<VkDebugUtilsMessengerCreateInfoEXT>();
             debugUtilsMessengerCreateInfo.pfnUserCallback = debug_utils_messenger_callback;
+            gvk::DispatchTable dispatchTable{ };
+            gvk::DispatchTable::load_global_entry_points(&dispatchTable);
+            uint32_t instanceExtensionCount = 0;
+            dispatchTable.gvkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, nullptr);
+            std::vector<VkExtensionProperties> instanceExtensionProperties(instanceExtensionCount);
+            dispatchTable.gvkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensionProperties.data());
+            auto debugUtilsSupported = std::any_of(
+                instanceExtensionProperties.begin(), instanceExtensionProperties.end(),
+                [](const VkExtensionProperties& extensionProperties)
+                {
+                    return strcmp(extensionProperties.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0;
+                }
+            );
 
             // Populate the gvk::Context::CreateInfo and call the base implementation.
             auto contextCreateInfo = gvk::get_default<gvk::Context::CreateInfo>();
@@ -118,7 +138,7 @@ public:
             contextCreateInfo.loadApiDumpLayer = VK_FALSE;    // TODO : Check layer properties before attempting to load
             contextCreateInfo.loadValidationLayer = VK_FALSE; // TODO : Check layer properties before attempting to load
             contextCreateInfo.loadWsiExtensions = VK_TRUE;
-            contextCreateInfo.pDebugUtilsMessengerCreateInfo = &debugUtilsMessengerCreateInfo;
+            contextCreateInfo.pDebugUtilsMessengerCreateInfo = debugUtilsSupported ? &debugUtilsMessengerCreateInfo : nullptr;
             contextCreateInfo.pDeviceCreateInfo = &deviceCreateInfo;
             gvk_result(gvk::Context::create(&contextCreateInfo, nullptr, pGvkSampleContext));
 #ifdef VK_NO_PROTOTYPES
@@ -263,6 +283,11 @@ inline VkResult gvk_sample_create_wsi_context(const gvk::Context& gvkContext, co
         win32SurfaceCreateInfo.hwnd = systemSurface.get<gvk::system::Surface::PlatformInfo>().hwnd;
         pSurfaceCreateInfo = (VkBaseInStructure*)&win32SurfaceCreateInfo;
 #endif
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+        auto androidSurfaceCreateInfo = gvk::get_default<VkAndroidSurfaceCreateInfoKHR>();
+        androidSurfaceCreateInfo.window = systemSurface.get<gvk::system::Surface::PlatformInfo>().androidWindow;
+        pSurfaceCreateInfo = (VkBaseInStructure*)&androidSurfaceCreateInfo;
+#endif
         gvk::SurfaceKHR surface = VK_NULL_HANDLE;
         gvk_result(gvk::SurfaceKHR::create(device.get<gvk::Instance>(), pSurfaceCreateInfo, nullptr, &surface));
 
@@ -272,6 +297,34 @@ inline VkResult gvk_sample_create_wsi_context(const gvk::Context& gvkContext, co
         wsiContextCreateInfo.presentMode = VK_PRESENT_MODE_MAILBOX_KHR; // Request; if unavailable VK_PRESENT_MODE_FIFO_KHR will be selected
         wsiContextCreateInfo.depthFormat = VK_FORMAT_D32_SFLOAT; // Request; if unavailable the supported VkFormat with the greatest bit depth that is less than or equal will be selected
         wsiContextCreateInfo.sampleCount = VK_SAMPLE_COUNT_64_BIT; // Request; if unavailable the max supported sample count that is less than or equal will be selected
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+        // NOTE : Android's ANativeWindow can be destroyed and later recreated while the app
+        //  is backgrounded/resumed (see gvk::system::Surface::PlatformInfo::androidWindow).
+        //  gvk::wsi::Context calls this to obtain a fresh SurfaceKHR whenever it encounters
+        //  VK_ERROR_SURFACE_LOST_KHR.  Only one gvk::system::Surface ever exists on Android
+        //  (see kaiju session-notes, plan step 5), so a function-local static holding what
+        //  the callback needs is sufficient -- no dedicated userdata lifetime to manage.
+        struct AndroidRecreateSurfaceUserData
+        {
+            gvk::Instance instance;
+            gvk::system::Surface systemSurface;
+        };
+        static AndroidRecreateSurfaceUserData sAndroidRecreateSurfaceUserData;
+        sAndroidRecreateSurfaceUserData.instance = device.get<gvk::Instance>();
+        sAndroidRecreateSurfaceUserData.systemSurface = systemSurface;
+        wsiContextCreateInfo.pfnRecreateSurface = [](void* pUserData, gvk::SurfaceKHR* pSurface) -> VkResult
+        {
+            const auto& userData = *(const AndroidRecreateSurfaceUserData*)pUserData;
+            auto androidWindow = userData.systemSurface.get<gvk::system::Surface::PlatformInfo>().androidWindow;
+            if (!androidWindow) {
+                return VK_ERROR_SURFACE_LOST_KHR; // Still backgrounded; try again next call
+            }
+            auto androidSurfaceCreateInfo = gvk::get_default<VkAndroidSurfaceCreateInfoKHR>();
+            androidSurfaceCreateInfo.window = androidWindow;
+            return gvk::SurfaceKHR::create(userData.instance, (const VkBaseInStructure*)&androidSurfaceCreateInfo, nullptr, pSurface);
+        };
+        wsiContextCreateInfo.pRecreateSurfaceUserData = &sAndroidRecreateSurfaceUserData;
+#endif
         gvk_result(gvk::wsi::Context::create(device, surface, &wsiContextCreateInfo, nullptr, pWsiContext));
     } gvk_result_scope_end;
     return gvkResult;

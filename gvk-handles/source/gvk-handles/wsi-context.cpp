@@ -83,17 +83,32 @@ VkResult Context::acquire_next_image(uint64_t timeout, VkFence vkFence, Acquired
     const auto& commandResources = get<std::vector<CommandResources>>()[frameResourceIndex];
 
     gvk_result_scope_begin(VK_INCOMPLETE) {
+        // NOTE : If there's currently no SurfaceKHR (never created yet, or lost -- eg.
+        //  Android while backgrounded), attempt to (re)validate before touching the device
+        //  at all; calling AcquireNextImageKHR() against a null/stale SwapchainKHR built on
+        //  a dead SurfaceKHR is invalid Vulkan usage, not something to react to after the
+        //  fact.  If still unavailable, there's simply nothing to acquire this frame.
+        if (!get<SurfaceKHR>()) {
+            gvk_result(validate_swapchain_resources());
+            if (!get<SurfaceKHR>()) {
+                gvk_result_scope_break(VK_ERROR_SURFACE_LOST_KHR);
+            }
+        }
+
         const auto& device = get<Device>();
         const auto& swapchain = get<SwapchainKHR>();
 
         // Wait on VkFence to ensure resources aren't in use
         gvk_result(device.WaitForFences(1, &commandResources.fence.get<VkFence>(), VK_TRUE, UINT64_MAX));
 
-        // Call vkAcquireNextImageKHR(), if VK_ERROR_OUT_OF_DATE_KHR recreate resources
+        // Call vkAcquireNextImageKHR(); recreate resources on VK_ERROR_OUT_OF_DATE_KHR or
+        //  VK_ERROR_SURFACE_LOST_KHR (the latter eg. Android's window being destroyed
+        //  mid-flight), returning the original status to the caller either way
         pAcquiredImageInfo->swapchain = swapchain;
         pAcquiredImageInfo->status = device.AcquireNextImageKHR(swapchain, timeout, commandResources.imageAcquiredSemaphore, vkFence, &pAcquiredImageInfo->index);
         switch (pAcquiredImageInfo->status) {
-        case VK_ERROR_OUT_OF_DATE_KHR: { gvk_result(validate_swapchain_resources()); gvk_result_scope_break(pAcquiredImageInfo->status); } break;
+        case VK_ERROR_OUT_OF_DATE_KHR:
+        case VK_ERROR_SURFACE_LOST_KHR: { gvk_result(validate_swapchain_resources()); gvk_result_scope_break(pAcquiredImageInfo->status); } break;
         case VK_SUCCESS:
         case VK_SUBOPTIMAL_KHR:        { gvkResult = pAcquiredImageInfo->status; } break;
         default:                       { gvk_result(pAcquiredImageInfo->status); } break;
@@ -126,17 +141,33 @@ VkResult Context::queue_present(const Queue& queue, const AcquiredImageInfo* pAc
         // Call vkQueuePresentKHR()
         auto status = queue.QueuePresentKHR(&get<VkPresentInfoKHR>(*pAcquiredImageInfo));
 
-        // Get VkSurfaceCapabilitiesKHR
+        // Get VkSurfaceCapabilitiesKHR (the SurfaceKHR may have been lost, eg. Android's
+        //  window being destroyed, between acquiring and presenting this image)
         VkSurfaceCapabilitiesKHR surfaceCapabilities{ };
-        gvk_result(get<Device>().get<PhysicalDevice>().GetPhysicalDeviceSurfaceCapabilitiesKHR(get<SurfaceKHR>(), &surfaceCapabilities));
+        auto surfaceCapabilitiesResult = get<SurfaceKHR>() ?
+            get<Device>().get<PhysicalDevice>().GetPhysicalDeviceSurfaceCapabilitiesKHR(get<SurfaceKHR>(), &surfaceCapabilities) :
+            VK_ERROR_SURFACE_LOST_KHR;
+
+        // NOTE : Route non-lost results through gvk_result() same as before this function
+        //  learned about VK_ERROR_SURFACE_LOST_KHR -- this both surfaces genuine unexpected
+        //  errors (unchanged behavior) and sets gvkResult to VK_SUCCESS on the common path,
+        //  since gvk_result_scope_begin(VK_INCOMPLETE) above only supplies gvkResult's
+        //  *initial* value.  VK_ERROR_SURFACE_LOST_KHR is deliberately skipped here so it
+        //  falls through to the recreation branch below instead of being treated as fatal.
+        if (surfaceCapabilitiesResult != VK_ERROR_SURFACE_LOST_KHR) {
+            gvk_result(surfaceCapabilitiesResult);
+        }
 
         // If status is anything but VK_SUCCESS (and isn't an actual failure), or if the
-        //  gvk::SurfaceKHR and gvk::SwapchainKHR extents don't match recreate resources.
+        //  SurfaceKHR was lost, or if the gvk::SurfaceKHR and gvk::SwapchainKHR extents
+        //  don't match, recreate resources.
         if (status == VK_SUBOPTIMAL_KHR ||
             status == VK_ERROR_OUT_OF_DATE_KHR ||
+            status == VK_ERROR_SURFACE_LOST_KHR ||
+            surfaceCapabilitiesResult == VK_ERROR_SURFACE_LOST_KHR ||
             pAcquiredImageInfo->status == VK_SUBOPTIMAL_KHR ||
             pAcquiredImageInfo->status == VK_ERROR_OUT_OF_DATE_KHR ||
-            get<SwapchainKHR>().get<VkSwapchainCreateInfoKHR>().imageExtent != surfaceCapabilities.currentExtent) {
+            (surfaceCapabilitiesResult == VK_SUCCESS && get<SwapchainKHR>().get<VkSwapchainCreateInfoKHR>().imageExtent != surfaceCapabilities.currentExtent)) {
             gvk_result(validate_swapchain_resources());
             gvkResult = status;
         }
@@ -450,10 +481,36 @@ VkResult Context::create_render_targets(std::vector<RenderTarget>* pRenderTarget
 VkResult Context::validate_swapchain_resources()
 {
     gvk_result_scope_begin(VK_SUCCESS) {
+        auto& controlBlock = mReference.get_obj();
         VkSurfaceCapabilitiesKHR surfaceCapabilities{ };
-        gvk_result(get<Device>().get<PhysicalDevice>().GetPhysicalDeviceSurfaceCapabilitiesKHR(get<SurfaceKHR>(), &surfaceCapabilities));
+        auto surfaceCapabilitiesResult = get<SurfaceKHR>() ?
+            get<Device>().get<PhysicalDevice>().GetPhysicalDeviceSurfaceCapabilitiesKHR(get<SurfaceKHR>(), &surfaceCapabilities) :
+            VK_ERROR_SURFACE_LOST_KHR;
+
+        // NOTE : If the SurfaceKHR is lost, or was never created yet (eg. Android before the
+        //  first window has appeared), and a recreation callback was provided, attempt to
+        //  obtain a fresh SurfaceKHR and retry.
+        if (surfaceCapabilitiesResult == VK_ERROR_SURFACE_LOST_KHR && controlBlock.mCreateInfo.pfnRecreateSurface) {
+            SurfaceKHR surface = VK_NULL_HANDLE;
+            if (controlBlock.mCreateInfo.pfnRecreateSurface(controlBlock.mCreateInfo.pRecreateSurfaceUserData, &surface) == VK_SUCCESS && surface) {
+                controlBlock.mSurface = surface;
+                surfaceCapabilitiesResult = get<Device>().get<PhysicalDevice>().GetPhysicalDeviceSurfaceCapabilitiesKHR(get<SurfaceKHR>(), &surfaceCapabilities);
+            }
+        }
+
+        // NOTE : Not an error, there's simply nothing to render to right now (eg. Android
+        //  while backgrounded, with no recreation callback able to produce a live surface
+        //  yet).  acquire_next_image() and queue_present() detect this via an absent
+        //  SurfaceKHR and report it to the caller without treating it as a hard failure.
+        if (surfaceCapabilitiesResult == VK_ERROR_SURFACE_LOST_KHR) {
+            controlBlock.mSurface = nullref;
+            controlBlock.mSwapchain = nullref;
+            controlBlock.mRenderTargets.clear();
+            gvk_result_scope_break(VK_SUCCESS);
+        }
+        gvk_result(surfaceCapabilitiesResult);
+
         if (surfaceCapabilities.currentExtent.width && surfaceCapabilities.currentExtent.height) {
-            auto& controlBlock = mReference.get_obj();
             controlBlock.mInfo.presentMode = select_present_mode(controlBlock.mCreateInfo.presentMode);
             controlBlock.mInfo.surfaceFormat = select_surface_format(controlBlock.mCreateInfo.surfaceFormat);
             controlBlock.mInfo.depthFormat = select_depth_format(controlBlock.mCreateInfo.depthFormat);

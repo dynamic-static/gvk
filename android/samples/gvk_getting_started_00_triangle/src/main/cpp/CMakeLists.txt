@@ -2,39 +2,59 @@
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 project(gvk_getting_started_00_triangle)
 
-# NOTE : Proof-of-life app for the Gradle/CMake/GameActivity plumbing (see kaiju
-#   session-notes, plan step 5).  Does not build or link gvk yet — that comes once this
-#   is confirmed working end to end on device.
+# NOTE : gvk-system's find_package(game-activity CONFIG) only resolves during a CMake
+#   configure that Gradle itself launches (Prefab injects the necessary find paths at that
+#   point), so gvk is pulled in as a live subdirectory of *this* configure rather than
+#   consumed as a prebuilt install package the way desktop kaiju does.  Enables the same
+#   module set gvk's own desktop samples link (see gvk/samples/CMakeLists.txt's
+#   gvkCoreSampleLinkLibraries) -- see kaiju session-notes, plan step 5.
+set(gvk-default_ENABLED OFF CACHE BOOL "" FORCE)
+set(gvk-gui_ENABLED ON CACHE BOOL "" FORCE)
+set(gvk-handles_ENABLED ON CACHE BOOL "" FORCE)
+set(gvk-math_ENABLED ON CACHE BOOL "" FORCE)
+set(gvk-runtime_ENABLED ON CACHE BOOL "" FORCE)
+set(gvk-spirv_ENABLED ON CACHE BOOL "" FORCE)
+set(gvk-structures_ENABLED ON CACHE BOOL "" FORCE)
+set(gvk-system_ENABLED ON CACHE BOOL "" FORCE)
+# NOTE : gvk-HOST_BINARY_DIR defaults to a path nested under this configure's own binary
+#   directory, which under Gradle's already-deep .cxx/<config>/<hash>/<abi>/ tree pushes
+#   the nested host build's own dependencies (eg. boost-multiprecision's FetchContent
+#   subbuild) past Windows' 260-character MAX_PATH -- confirmed by a real
+#   "lastbuildstate...exceeds the OS max path limit" build failure.  Redirecting it
+#   somewhere short and stable also means the nested host-generate build is shared/reused
+#   across Android app configures instead of being tied to one Gradle variant's path.
+set(gvkSourceDir "${CMAKE_CURRENT_LIST_DIR}/../../../../../..")
+set(gvk-HOST_BINARY_DIR "${gvkSourceDir}/build-android-host" CACHE PATH "" FORCE)
+add_subdirectory("${gvkSourceDir}" gvk-build)
 
-find_package(game-activity REQUIRED CONFIG)
-
-# NOTE : game-activity_static bundles its own compiled android_native_app_glue
-#   (android_main()/android_app event-pump convention) internally -- confirmed by a
-#   "duplicate symbol" linker error from also compiling the NDK's own copy of
-#   android_native_app_glue.c here.  Its header (<game-activity/native_app_glue/
-#   android_native_app_glue.h>, included from main.cpp) comes from game-activity's own
-#   Prefab-exported include directories via the target_link_libraries below -- nothing
-#   extra needed here for it.
+# NOTE : gvk-getting-started-00-triangle.cpp and its companion files are the SAME shared
+#   source gvk's desktop build uses (gvk/samples/) -- not a separate Android copy.
+#   android-main.cpp is the only file here written for this app specifically.
+set(gvkSamplesDir "${gvkSourceDir}/samples")
 add_library(
     gvk_getting_started_00_triangle
     SHARED
-    main.cpp
+    android-main.cpp
+    "${gvkSamplesDir}/gvk-getting-started-00-triangle.cpp"
+    "${gvkSamplesDir}/gvk-sample-entry-points.cpp"
+    "${gvkSamplesDir}/gvk-sample-entry-points.hpp"
+    "${gvkSamplesDir}/gvk-sample-png.hpp"
+    "${gvkSamplesDir}/gvk-sample-utilities.hpp"
 )
+target_include_directories(gvk_getting_started_00_triangle PRIVATE "${gvkSamplesDir}")
 
 target_link_libraries(
     gvk_getting_started_00_triangle
     PUBLIC
-    android
-    log
-    game-activity::game-activity_static
+    gvk-gui
+    gvk-handles
+    gvk-math
+    gvk-runtime
+    gvk-spirv
+    gvk-structures
+    gvk-system
 )
 
-# NOTE : game-activity_static's JNI implementation of GameActivity.initializeNativeCode()
-#   is otherwise stripped by the linker, since nothing in our own code calls it directly
-#   -- only the JVM looks it up dynamically by name at runtime.  Without this, the app
-#   crashes at launch with UnsatisfiedLinkError.
-target_link_options(
-    gvk_getting_started_00_triangle
-    PRIVATE
-    "-u" "Java_com_google_androidgamesdk_GameActivity_initializeNativeCode"
-)
+if(VK_NO_PROTOTYPES)
+    target_compile_definitions(gvk_getting_started_00_triangle PUBLIC VK_NO_PROTOTYPES=1)
+endif()

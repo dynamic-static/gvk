@@ -100,6 +100,23 @@ public:
             @note Any flags that are unsupported will be omitted
         */
         VkImageUsageFlags imageUsage{ VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT };
+
+        /**
+        Optional callback used to obtain a fresh SurfaceKHR whenever the current one is lost
+        (VK_ERROR_SURFACE_LOST_KHR) -- eg. Android's ANativeWindow being destroyed and later
+        recreated while the app is backgrounded and resumed
+            @note gvk::wsi::Context never creates a SurfaceKHR itself, only ever recreates
+                one via this callback; the caller remains responsible for platform surface
+                creation, same as the SurfaceKHR originally passed to gvk::wsi::Context::create()
+            @note If left null, VK_ERROR_SURFACE_LOST_KHR propagates as a failure, correct for
+                platforms where a live gvk::wsi::Context should never encounter it
+        */
+        VkResult (*pfnRecreateSurface)(void* pUserData, SurfaceKHR* pSurface){ nullptr };
+
+        /**
+        Optional user data passed to CreateInfo::pfnRecreateSurface
+        */
+        void* pRecreateSurfaceUserData{ nullptr };
     };
 
     /**

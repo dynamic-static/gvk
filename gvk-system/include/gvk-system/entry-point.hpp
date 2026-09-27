@@ -26,23 +26,29 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-// NOTE : Internal to gvk-system's Android backend.  Not installed, not part of
-//  gvk-system's public interface.  gvk::system::set_android_app() (called by the
-//  application's own android_main(), see entry-point.hpp) is declared there instead,
-//  since application code needs to call it; get_android_app() only needs to be visible
-//  here, to android-game-activity-surface.cpp itself.
+// NOTE : gvk-system does not supply main()/android_main() itself -- the application does,
+//  same shape as kaiju's own existing main.cpp/kaiju::game() split.  Application code
+//  implements gvk_main(argc, ppArgv) with its portable entry logic.
+//    - Desktop : gvk_main *is* main(), via the macro below.
+//    - Android : the application also implements its own real
+//      extern "C" void android_main(struct android_app*) (the actual native_app_glue
+//      contract -- no argc/ppArgv exist on Android), which at minimum calls
+//      gvk::system::set_android_app(pAndroidApp) so Surface::create() can find it, then
+//      calls gvk_main(0, nullptr).
 #ifdef __ANDROID__
 
 struct android_app;
 
 namespace gvk {
 namespace system {
-namespace detail {
 
-android_app* get_android_app();
+void set_android_app(android_app* pAndroidApp);
 
-} // namespace detail
 } // namespace system
 } // namespace gvk
+
+#else
+
+#define gvk_main main
 
 #endif // __ANDROID__
