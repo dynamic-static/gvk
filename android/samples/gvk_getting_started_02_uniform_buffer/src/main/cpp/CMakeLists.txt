@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
-project(gvk_getting_started_00_triangle)
+project(gvk_getting_started_02_uniform_buffer)
 
 # NOTE : gvk-system's find_package(game-activity CONFIG) only resolves during a CMake
 #   configure that Gradle itself launches (Prefab injects the necessary find paths at that
@@ -29,30 +29,30 @@ set(gvk-HOST_BINARY_DIR "${gvkSourceDir}/build-android-host" CACHE PATH "" FORCE
 # NOTE : Same MAX_PATH problem, different victim: FETCHCONTENT_BASE_DIR (where the OUTER/
 #   target build's own FetchContent subbuilds land, eg. VulkanMemoryAllocator) defaults to
 #   under THIS configure's own (deep, Gradle-.cxx-nested) binary directory too.  Hit for
-#   real on gvk_getting_started_02_uniform_buffer, whose longer target name was enough to
-#   tip an already-marginal path over 260 characters.  Same fix, same reasoning as
+#   real on this sample specifically -- its longer target name was enough to tip an
+#   already-marginal path over 260 characters.  Same fix, same reasoning as
 #   gvk-HOST_BINARY_DIR above.
 set(FETCHCONTENT_BASE_DIR "${gvkSourceDir}/build-android-deps" CACHE PATH "" FORCE)
 add_subdirectory("${gvkSourceDir}" gvk-build)
 
-# NOTE : gvk-getting-started-00-triangle.cpp and its companion files are the SAME shared
-#   source gvk's desktop build uses (gvk/samples/) -- not a separate Android copy.
+# NOTE : gvk-getting-started-02-uniform-buffer.cpp and its companion files are the SAME
+#   shared source gvk's desktop build uses (gvk/samples/) -- not a separate Android copy.
 #   android-main.cpp is the only file here written for this app specifically.
 set(gvkSamplesDir "${gvkSourceDir}/samples")
 add_library(
-    gvk_getting_started_00_triangle
+    gvk_getting_started_02_uniform_buffer
     SHARED
     android-main.cpp
-    "${gvkSamplesDir}/gvk-getting-started-00-triangle.cpp"
+    "${gvkSamplesDir}/gvk-getting-started-02-uniform-buffer.cpp"
     "${gvkSamplesDir}/gvk-sample-entry-points.cpp"
     "${gvkSamplesDir}/gvk-sample-entry-points.hpp"
     "${gvkSamplesDir}/gvk-sample-png.hpp"
     "${gvkSamplesDir}/gvk-sample-utilities.hpp"
 )
-target_include_directories(gvk_getting_started_00_triangle PRIVATE "${gvkSamplesDir}")
+target_include_directories(gvk_getting_started_02_uniform_buffer PRIVATE "${gvkSamplesDir}")
 
 target_link_libraries(
-    gvk_getting_started_00_triangle
+    gvk_getting_started_02_uniform_buffer
     PUBLIC
     gvk-gui
     gvk-handles
@@ -65,5 +65,5 @@ target_link_libraries(
 )
 
 if(VK_NO_PROTOTYPES)
-    target_compile_definitions(gvk_getting_started_00_triangle PUBLIC VK_NO_PROTOTYPES=1)
+    target_compile_definitions(gvk_getting_started_02_uniform_buffer PUBLIC VK_NO_PROTOTYPES=1)
 endif()

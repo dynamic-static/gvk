@@ -59,7 +59,7 @@ VkResult create_mesh(const gvk::Context& context, gvk::Mesh* pMesh)
     return gvkResult;
 }
 
-int main(int, const char*[])
+int gvk_main(int, const char*[])
 {
     gvk_result_scope_begin(VK_ERROR_INITIALIZATION_FAILED) {
 

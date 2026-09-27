@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
-project(gvk_getting_started_00_triangle)
+project(gvk_getting_started_03_texture_mapping)
 
 # NOTE : gvk-system's find_package(game-activity CONFIG) only resolves during a CMake
 #   configure that Gradle itself launches (Prefab injects the necessary find paths at that
@@ -35,24 +35,24 @@ set(gvk-HOST_BINARY_DIR "${gvkSourceDir}/build-android-host" CACHE PATH "" FORCE
 set(FETCHCONTENT_BASE_DIR "${gvkSourceDir}/build-android-deps" CACHE PATH "" FORCE)
 add_subdirectory("${gvkSourceDir}" gvk-build)
 
-# NOTE : gvk-getting-started-00-triangle.cpp and its companion files are the SAME shared
-#   source gvk's desktop build uses (gvk/samples/) -- not a separate Android copy.
+# NOTE : gvk-getting-started-03-texture-mapping.cpp and its companion files are the SAME
+#   shared source gvk's desktop build uses (gvk/samples/) -- not a separate Android copy.
 #   android-main.cpp is the only file here written for this app specifically.
 set(gvkSamplesDir "${gvkSourceDir}/samples")
 add_library(
-    gvk_getting_started_00_triangle
+    gvk_getting_started_03_texture_mapping
     SHARED
     android-main.cpp
-    "${gvkSamplesDir}/gvk-getting-started-00-triangle.cpp"
+    "${gvkSamplesDir}/gvk-getting-started-03-texture-mapping.cpp"
     "${gvkSamplesDir}/gvk-sample-entry-points.cpp"
     "${gvkSamplesDir}/gvk-sample-entry-points.hpp"
     "${gvkSamplesDir}/gvk-sample-png.hpp"
     "${gvkSamplesDir}/gvk-sample-utilities.hpp"
 )
-target_include_directories(gvk_getting_started_00_triangle PRIVATE "${gvkSamplesDir}")
+target_include_directories(gvk_getting_started_03_texture_mapping PRIVATE "${gvkSamplesDir}")
 
 target_link_libraries(
-    gvk_getting_started_00_triangle
+    gvk_getting_started_03_texture_mapping
     PUBLIC
     gvk-gui
     gvk-handles
@@ -65,5 +65,5 @@ target_link_libraries(
 )
 
 if(VK_NO_PROTOTYPES)
-    target_compile_definitions(gvk_getting_started_00_triangle PUBLIC VK_NO_PROTOTYPES=1)
+    target_compile_definitions(gvk_getting_started_03_texture_mapping PUBLIC VK_NO_PROTOTYPES=1)
 endif()

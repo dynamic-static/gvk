@@ -17,3 +17,7 @@ dependencyResolutionManagement {
 rootProject.name = 'gvk-android'
 
 include ':samples:gvk_getting_started_00_triangle'
+include ':samples:gvk_getting_started_01_mesh'
+include ':samples:gvk_getting_started_02_uniform_buffer'
+include ':samples:gvk_getting_started_03_texture_mapping'
+include ':samples:gvk_getting_started_04_render_target'

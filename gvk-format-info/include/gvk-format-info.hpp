@@ -150,14 +150,31 @@ inline void enumerate_formats(
             auto formatProperties2 = get_default<VkFormatProperties2>();
             formatProperties2.pNext = &formatProperties3;
             pfnVkGetPhysicalDeviceFormatProperties2(vkPhysicalDevice, format, &formatProperties2);
+            // NOTE : VkFormatProperties3 (VK_KHR_format_feature_flags2, core in Vulkan 1.3)
+            //  is chained above, but a driver that doesn't support it must ignore the
+            //  unrecognized pNext struct per spec, leaving formatProperties3 zeroed for
+            //  every format -- trusting it alone silently returns nothing on any
+            //  pre-1.3 device.  Found for real: this made gvk::get_max_depth_format()
+            //  return VK_FORMAT_UNDEFINED unconditionally on a Vulkan 1.1 Android device.
+            //  OR it together with the base VkFormatProperties2 fields (guaranteed present
+            //  since 1.1, bit-compatible with VkFormatFeatureFlags2's low 32 bits by spec
+            //  design) so a driver without VkFormatProperties3 support still gets a
+            //  correct answer from the baseline fields.
+            // TODO : Fold into the DispatchTable::apiVersion work (~TODO.md, "gvk-runtime /
+            //  dispatch table generation") -- PhysicalDevice's own dispatch table should
+            //  know its real API version and only expose/attempt entry points actually
+            //  available for it, instead of every caller routing around gaps like this one
+            //  by hand.
+            auto optimalTilingFeatures = (VkFormatFeatureFlags2)formatProperties2.formatProperties.optimalTilingFeatures | formatProperties3.optimalTilingFeatures;
+            auto linearTilingFeatures = (VkFormatFeatureFlags2)formatProperties2.formatProperties.linearTilingFeatures | formatProperties3.linearTilingFeatures;
             switch (imageTiling) {
             case VK_IMAGE_TILING_OPTIMAL: {
-                if (formatProperties3.optimalTilingFeatures & featureFlags) {
+                if (optimalTilingFeatures & featureFlags) {
                     return processFormat(format);
                 }
             } break;
             case VK_IMAGE_TILING_LINEAR: {
-                if (formatProperties3.linearTilingFeatures & featureFlags) {
+                if (linearTilingFeatures & featureFlags) {
                     return processFormat(format);
                 }
             } break;
