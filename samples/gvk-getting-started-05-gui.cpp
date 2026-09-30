@@ -100,7 +100,7 @@ VkResult create_mesh(
     );
 }
 
-int main(int, const char*[])
+int gvk_main(int, const char*[])
 {
     gvk_result_scope_begin(VK_ERROR_INITIALIZATION_FAILED) {
         GvkSampleContext context;

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- NOTE : AppCompatActivity (which GameActivity extends) requires an AppCompat
+         theme (or descendant); throws at runtime otherwise. -->
+    <style name="Theme.GvkSample" parent="Theme.AppCompat.NoActionBar" />
+</resources>
