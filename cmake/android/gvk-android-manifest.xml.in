@@ -5,11 +5,11 @@
     <uses-feature android:name="android.hardware.vulkan.level" android:version="1" android:required="true" />
 
     <application
-        android:label="gvk-getting-started-02-uniform-buffer"
+        android:label="@APP_LABEL@"
         android:theme="@style/Theme.GvkSample"
         android:hasCode="true">
         <activity
-            android:name=".UniformBufferActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden">
             <intent-filter>
@@ -19,7 +19,7 @@
             <!-- NOTE : Only needed because our library isn't named libmain.so -->
             <meta-data
                 android:name="android.app.lib_name"
-                android:value="gvk_getting_started_02_uniform_buffer" />
+                android:value="@ANDROID_TARGET@" />
         </activity>
     </application>
 

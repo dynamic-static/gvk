@@ -34,6 +34,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <utility>
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
+
 namespace gvk {
 
 template <>
@@ -239,6 +243,26 @@ static void add_key_event(const system::Input& input, ImGuiKey imGuiKey)
     }
 }
 
+// NOTE : ImGui's own widget hit-testing is fundamentally single-pointer regardless of
+//  platform (same reason Dear ImGui's own reference Android backend does this) -- find
+//  the one touch to drive it as a synthesized mouse, rather than trying to expose
+//  multi-touch to ImGui itself.  Keeps returning the same pointer through its release
+//  frame (not just while down()) so the button-up event still carries its correct last
+//  position instead of falling back to Mouse's (on Android, never-fed, always {0,0})
+//  position for that one frame.  Known, accepted limitation: scans in array/slot order,
+//  not press order -- if a second finger touches down before the first releases, which
+//  pointer "wins" isn't guaranteed to be the first one pressed.  Not meant to support
+//  real multi-touch gestures on ImGui widgets, just press/drag/release with one finger.
+static const system::Touch::Pointer* get_primary_touch_pointer(const system::Touch& touch)
+{
+    for (const auto& pointer : touch.pointers) {
+        if (pointer.down() || pointer.released()) {
+            return &pointer;
+        }
+    }
+    return nullptr;
+}
+
 void Renderer::begin_gui(const BeginInfo& beginInfo)
 {
     auto& imGuiIo = ImGui::GetIO();
@@ -247,16 +271,55 @@ void Renderer::begin_gui(const BeginInfo& beginInfo)
     imGuiIo.DisplaySize.y = beginInfo.extent[1];
     imGuiIo.DisplayFramebufferScale.x = 1.0f;
     imGuiIo.DisplayFramebufferScale.y = 1.0f;
+    if (beginInfo.textStreamCodePointCount) {
+        // NOTE : Queued deliberately before any mouse/key events below.  ImGui::
+        //  NewFrame() processes its queued input events in order and "trickles" them --
+        //  it stops processing (leaving the rest queued for a later frame) as soon as
+        //  it hits a text event after a mouse or non-char key event has already been
+        //  processed that same call (see imgui.cpp's UpdateInputEvents(), the
+        //  "Trickling Rule" comments around ImGuiInputEventType_Text).  Queuing the
+        //  mouse-position/button and the ~90 individual key events below EVERY frame,
+        //  ahead of text, meant a text event queued on frame N could keep losing that
+        //  race to whatever mouse/key event arrived on frame N+1, N+2, etc., so it
+        //  would sit unprocessed until something (eg. a fresh tap) broke the pattern --
+        //  confirmed live on-device as the cause of ImGui not updating while typing on
+        //  the on-screen keyboard (text only landed once the field was interacted with
+        //  again).  Feeding text first each frame means it is always the oldest entry
+        //  in the queue for its own frame, so it can no longer be blocked by events
+        //  queued after it.
+        assert(beginInfo.pTextStreamCodePoints);
+#ifdef __ANDROID__
+        // TODO (temporary diagnostic, remove once text delivery is confirmed working) :
+        __android_log_print(ANDROID_LOG_INFO, "gvk-text-input", "begin_gui() AddInputCharacter() x%u, WantTextInput=%d",
+            beginInfo.textStreamCodePointCount, (int)ImGui::GetIO().WantTextInput);
+#endif
+        for (uint32_t i = 0; i < beginInfo.textStreamCodePointCount; ++i) {
+            imGuiIo.AddInputCharacter(beginInfo.pTextStreamCodePoints[i]);
+        }
+    }
     if (beginInfo.pInput) {
         // TODO : Hook up input event queue
         // NOTE : Possibly "system::InputStream" object that can be connected between
         //  system::Surface and gui::Renderer
         // NOTE : https://github.com/ocornut/imgui/issues/4921
-        imGuiIo.AddMousePosEvent(beginInfo.pInput->mouse.position.current[0], beginInfo.pInput->mouse.position.current[1]);
-        imGuiIo.AddMouseButtonEvent(0, beginInfo.pInput->mouse.buttons.down(system::Mouse::Button::Left));
+        if (auto pTouchPointer = get_primary_touch_pointer(beginInfo.pInput->touch)) {
+            imGuiIo.AddMousePosEvent(pTouchPointer->position.current[0], pTouchPointer->position.current[1]);
+            imGuiIo.AddMouseButtonEvent(0, pTouchPointer->down());
+        } else {
+            imGuiIo.AddMousePosEvent(beginInfo.pInput->mouse.position.current[0], beginInfo.pInput->mouse.position.current[1]);
+            imGuiIo.AddMouseButtonEvent(0, beginInfo.pInput->mouse.buttons.down(system::Mouse::Button::Left));
+        }
         imGuiIo.AddMouseButtonEvent(1, beginInfo.pInput->mouse.buttons.down(system::Mouse::Button::Right));
         imGuiIo.AddMouseWheelEvent(beginInfo.pInput->mouse.scroll.delta()[0], beginInfo.pInput->mouse.scroll.delta()[1]);
-        imGuiIo.AddKeyEvent(ImGuiMod_Ctrl, beginInfo.pInput->keyboard.down(system::Key::LeftControl) || beginInfo.pInput->keyboard.down(system::Key::RightControl));
+        auto ctrlDown = beginInfo.pInput->keyboard.down(system::Key::LeftControl) || beginInfo.pInput->keyboard.down(system::Key::RightControl);
+#ifdef __ANDROID__
+        // TODO (temporary diagnostic, remove once text delivery is confirmed working) :
+        if (ctrlDown) {
+            __android_log_print(ANDROID_LOG_INFO, "gvk-text-input", "Ctrl appears DOWN this frame (LeftControl=%d, RightControl=%d) -- InputTextEx() silently ignores io.InputQueueCharacters whenever ImGui thinks Ctrl is held",
+                (int)beginInfo.pInput->keyboard.down(system::Key::LeftControl), (int)beginInfo.pInput->keyboard.down(system::Key::RightControl));
+        }
+#endif
+        imGuiIo.AddKeyEvent(ImGuiMod_Ctrl, ctrlDown);
         imGuiIo.AddKeyEvent(ImGuiMod_Shift, beginInfo.pInput->keyboard.down(system::Key::LeftShift) || beginInfo.pInput->keyboard.down(system::Key::RightShift));
         imGuiIo.AddKeyEvent(ImGuiMod_Alt, beginInfo.pInput->keyboard.down(system::Key::LeftAlt) || beginInfo.pInput->keyboard.down(system::Key::RightAlt));
 #if 0
@@ -371,13 +434,14 @@ void Renderer::begin_gui(const BeginInfo& beginInfo)
         add_key_event(*beginInfo.pInput, ImGuiKey_KeypadEnter);
         add_key_event(*beginInfo.pInput, ImGuiKey_KeypadEqual);
     }
-    if (beginInfo.textStreamCodePointCount) {
-        assert(beginInfo.pTextStreamCodePoints);
-        for (uint32_t i = 0; i < beginInfo.textStreamCodePointCount; ++i) {
-            ImGui::GetIO().AddInputCharacter(beginInfo.pTextStreamCodePoints[i]);
-        }
-    }
     ImGui::NewFrame();
+#ifdef __ANDROID__
+    // TODO (temporary diagnostic, remove once text delivery is confirmed working) :
+    if (beginInfo.textStreamCodePointCount) {
+        __android_log_print(ANDROID_LOG_INFO, "gvk-text-input", "AFTER NewFrame(): io.InputQueueCharacters.Size=%d (fed %u this frame -- if 0 here, NewFrame() itself dropped/blocked them; if equal to fed count, a widget just isn't consuming them)",
+            ImGui::GetIO().InputQueueCharacters.Size, beginInfo.textStreamCodePointCount);
+    }
+#endif
     if (beginInfo.pDragDropPath && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceExtern)) {
         ImGui::SetDragDropPayload("external", beginInfo.pDragDropPath, strlen(beginInfo.pDragDropPath), ImGuiCond_Once);
         ImGui::EndDragDropSource();

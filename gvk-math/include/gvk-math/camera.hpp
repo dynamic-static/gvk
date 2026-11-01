@@ -87,6 +87,15 @@ public:
         bool moveRight{ };
         bool moveForward{ };
         bool moveBackward{ };
+        /**
+         * @brief Direct per-frame movement along the right (x), forward (y), and up
+         *   (z) axes, applied immediately rather than integrated over time like
+         *   moveUp/Down/Left/Right/Forward/Backward above -- eg. a touch drag's
+         *   frame-to-frame screen delta, pre-scaled by the caller to world units. x
+         *   pans (right positive, left negative), y dollies (forward positive,
+         *   backward negative), z lifts (up positive, down negative)
+         */
+        glm::vec3 moveDelta{ };
         float moveSpeedMultiplier{ 1 };
         glm::vec2 lookDelta{ };
         float fieldOfViewDelta{ };

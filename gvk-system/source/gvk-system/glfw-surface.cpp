@@ -199,6 +199,19 @@ void Surface::set_window_extent(const std::array<int32_t, 2>& extent)
     glfwSetWindowSize((GLFWwindow*)mReference->mpWindowHandle, extent[0], extent[1]);
 }
 
+void Surface::show_soft_input()
+{
+    assert(mReference);
+    // NOTE : No-op; a physical keyboard is just always there on desktop, no platform
+    //  concept of summoning one.
+}
+
+void Surface::hide_soft_input()
+{
+    assert(mReference);
+    // NOTE : No-op, same rationale as show_soft_input() above.
+}
+
 Surface::ControlBlock::ControlBlock()
 {
     GlfwWindowSet::instance().access(

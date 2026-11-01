@@ -17,6 +17,12 @@ foreach(gvkCoreSampleLinkLibrary ${gvkCoreSampleLinkLibraries})
     endif()
 endforeach()
 
+# NOTE : When enabled, gvk_add_core_sample() also generates an Android Gradle app for
+#   each sample (gvk/android/samples/<name>/) via gvk_add_android_app() -- see
+#   gvk/cmake/android.cmake.  Off by default: this writes files under gvk/android/
+#   every configure, and most desktop configures don't care about Android at all.
+option(gvk-build-android-samples "Generate an Android Gradle app for each core sample" OFF)
+
 macro(gvk_add_core_sample target linkLibraries)
     gvk_add_executable(
         TARGET ${target}
@@ -32,6 +38,38 @@ macro(gvk_add_core_sample target linkLibraries)
     if(VK_NO_PROTOTYPES)
         target_compile_definitions(${target} PUBLIC VK_NO_PROTOTYPES=1)
     endif()
+    if(gvk-build-android-samples)
+        # NOTE : "gvk-getting-started-00-triangle" -> "getting_started_00_triangle" --
+        #   Java package segments can't contain hyphens, see kaiju session notes,
+        #   package name sanitization.
+        string(REPLACE "gvk-" "" androidSampleName "${target}")
+        string(REPLACE "-" "_" androidSampleName "${androidSampleName}")
+        gvk_add_android_app(
+            ANDROID_TARGET "gvk_${androidSampleName}"
+            PACKAGE "com.gvk.${androidSampleName}"
+            APP_LABEL "${target}"
+            OUTPUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../android/samples/gvk_${androidSampleName}"
+            GRADLE_MODULE_PATH ":samples:gvk_${androidSampleName}"
+            # NOTE : 6 "../" from src/main/cpp/ (gvk/android/samples/<name>/src/main/cpp/)
+            #   back up to gvk's own repo root.
+            GVK_SOURCE_DIR "\${CMAKE_CURRENT_LIST_DIR}/../../../../../.."
+            LINK_LIBRARIES ${linkLibraries}
+            SOURCE_FILES
+                "\${gvkSamplesDir}/gvk-sample-entry-points.cpp"
+                "\${gvkSamplesDir}/gvk-sample-entry-points.hpp"
+                "\${gvkSamplesDir}/gvk-sample-png.hpp"
+                "\${gvkSamplesDir}/gvk-sample-utilities.hpp"
+                "\${gvkSamplesDir}/${target}.cpp"
+            INCLUDE_DIRECTORIES "\${gvkSamplesDir}"
+            # NOTE : No trailing ';' -- the template supplies it.  CMake can't tell "a
+            #   string containing a literal semicolon" apart from "a list" (worse inside
+            #   a macro body, where \; escaping didn't survive expansion either), so an
+            #   embedded ';' here gets silently eaten -- found for real: the generated
+            #   android-main.cpp lost this declaration's trailing semicolon.
+            ENTRY_POINT_FORWARD_DECLARATION "int gvk_main(int argc, const char* ppArgv[])"
+            ENTRY_POINT_CALL "gvk_main(0, nullptr)"
+        )
+    endif()
 endmacro()
 
 if(gvkCoreSamplesEnabled)
@@ -42,6 +80,9 @@ if(gvkCoreSamplesEnabled)
     gvk_add_core_sample(gvk-getting-started-03-texture-mapping "${gvkCoreSampleLinkLibraries}")
     gvk_add_core_sample(gvk-getting-started-04-render-target   "${gvkCoreSampleLinkLibraries}")
     gvk_add_core_sample(gvk-getting-started-05-gui             "${gvkCoreSampleLinkLibraries}")
+    if(gvk-build-android-samples)
+        gvk_configure_android_root(OUTPUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../android")
+    endif()
 endif()
 
 if(gvk-string_ENABLED)

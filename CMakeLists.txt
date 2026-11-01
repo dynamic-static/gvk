@@ -7,6 +7,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/install/" CACHE PATH "..." FORCE)
 endif()
 include(gvk.build)
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/android/android.cmake")
 
 ################################################################################
 # Vulkan SDK options

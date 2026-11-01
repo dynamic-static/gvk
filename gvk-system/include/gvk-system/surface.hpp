@@ -141,6 +141,12 @@ public:
     void get_window_position(int32_t* pX, int32_t* pY) const;
     void get_window_extent(int32_t* pWidth, int32_t* pHeight) const;
     void set_window_extent(const std::array<int32_t, 2>& extent);
+    // NOTE : No-op on desktop (a physical keyboard is just always there).  On Android,
+    //  wraps GameActivity_showSoftInput()/hideSoftInput() -- intended caller: once per
+    //  frame, on the rising/falling edge of ImGui::GetIO().WantTextInput (a widget-
+    //  agnostic signal ImGui already provides, so this needs no per-widget code).
+    void show_soft_input();
+    void hide_soft_input();
 
     template <typename T>
     const T& get() const

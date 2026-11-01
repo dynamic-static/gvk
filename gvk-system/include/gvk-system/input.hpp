@@ -28,6 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gvk-system/keyboard.hpp"
 #include "gvk-system/mouse.hpp"
+#include "gvk-system/touch.hpp"
 
 namespace gvk {
 namespace system {
@@ -39,10 +40,12 @@ public:
     {
         keyboard.update();
         mouse.update();
+        touch.update();
     }
 
     Keyboard keyboard { };
     Mouse mouse { };
+    Touch touch { };
 };
 
 } // namespace system

@@ -90,8 +90,28 @@ void FreeCameraController::update(const UpdateInfo& updateInfo)
             move += updateInfo.moveRight ? mpCamera->transform.right() : glm::vec3 { };
             move += updateInfo.moveForward ? mpCamera->transform.forward() : glm::vec3 { };
             move += updateInfo.moveBackward ? mpCamera->transform.backward() : glm::vec3 { };
-            move = (move.x || move.y || move.z) ? glm::normalize(move) : glm::vec3 { };
+            // NOTE : Clamp instead of the old unconditional normalize() -- one bool
+            //  held gives length 1 already (clamp is a no-op), two at once give
+            //  length sqrt(2) and get clamped to 1, same result normalize() gave, but
+            //  a zero vector now falls through untouched instead of needing an
+            //  explicit div-by-zero guard.
+            auto moveLengthSquared = glm::dot(move, move);
+            move = moveLengthSquared > 1 ? move / glm::sqrt(moveLengthSquared) : move;
             mpCamera->transform.translation += move * moveSpeed * updateInfo.moveSpeedMultiplier * updateInfo.deltaTime;
+            // NOTE : moveDelta applied directly, not integrated by moveSpeed/deltaTime
+            //  like the digital move above -- this is a per-frame position delta (eg.
+            //  a touch drag's frame-to-frame screen movement, pre-scaled by the
+            //  caller to world units already), not a held analog axis. Matches
+            //  lookDelta/fieldOfViewDelta's convention below, deliberately not the
+            //  velocity-integrated digital move above. Caveat: this makes it
+            //  frame-rate-dependent if something ever drives it continuously (eg. a
+            //  held gamepad stick) rather than as a one-shot per-frame drag delta --
+            //  fine for touch-drag today, worth revisiting if a held analog source
+            //  needs this later.
+            mpCamera->transform.translation +=
+                mpCamera->transform.right() * updateInfo.moveDelta.x +
+                mpCamera->transform.forward() * updateInfo.moveDelta.y +
+                mpCamera->transform.up() * updateInfo.moveDelta.z;
         }
         if (lookEnabled) {
             auto look = updateInfo.lookDelta * lookSpeed;
